@@ -34,7 +34,6 @@ class Comment extends Model implements HasRichContent
 {
     use HasFactory;
     use InteractsWithRichContent;
-    use SoftDeletes;
 
     /**
      * @return BelongsTo<Authenticatable, $this>
