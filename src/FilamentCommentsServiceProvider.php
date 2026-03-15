@@ -24,7 +24,7 @@ class FilamentCommentsServiceProvider extends PackageServiceProvider
 
     public function packageRegistered()
     {
-        $this->app->bind(Comment::class, Comment::class);
+        $this->app->bindIf(Comment::class, Comment::class);
     }
 
     public function packageBooted()

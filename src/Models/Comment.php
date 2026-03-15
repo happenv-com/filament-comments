@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Happenv\FilamentComments\Models;
 
-use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 use Filament\Forms\Components\RichEditor\Models\Concerns\InteractsWithRichContent;
 use Filament\Forms\Components\RichEditor\Models\Contracts\HasRichContent;
