@@ -1,0 +1,82 @@
+{
+    "name": "happenv-com/filament-comments",
+    "description": "Comments module for Filament",
+    "keywords": [
+        "filament",
+        "laravel",
+        "filamentphp",
+        "comments"
+    ],
+    "version": "1.0.0",
+    "homepage": "https://happenv.com",
+    "support": {
+        "issues": "https://github.com/happenv-com/filament-comments/issues",
+        "source": "https://github.com/happenv-com/filament-comments"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Bartlomiej Gajda",
+            "email": "b.gajda@happenv.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^8.4",
+        "filament/filament": "^4.0|^5.0",
+        "spatie/laravel-package-tools": "^1.15.0"
+    },
+    "require-dev": {
+        "larastan/larastan": "^3.0",
+        "laravel/pint": "^1.0",
+        "nunomaduro/collision": "^8.0",
+        "orchestra/testbench": "^9.0|^10.0",
+        "pestphp/pest": "^3.0",
+        "pestphp/pest-plugin-arch": "^3.0",
+        "pestphp/pest-plugin-laravel": "^3.0",
+        "pestphp/pest-plugin-livewire": "^3.0",
+        "phpstan/phpstan-deprecation-rules": "^2.0",
+        "phpstan/phpstan-phpunit": "^2.0",
+        "rector/rector": "^2.0",
+        "spatie/laravel-ray": "^1.26"
+    },
+    "autoload": {
+        "psr-4": {
+            "Happenv\\Comments\\": "src/",
+            "Happenv\\Comments\\Database\\Factories\\": "database/factories/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Happenv\\Comments\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "post-autoload-dump": "@php ./vendor/bin/testbench package:discover --ansi",
+        "analyse": "phpstan analyse",
+        "lint": "pint",
+        "refactor": "rector",
+        "test": "pest",
+        "test:lint": "pint --test",
+        "test:refactor": "rector --dry-run"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Happenv\\Comments\\CommentsServiceProvider"
+            ],
+            "aliases": {
+                "Comments": "Happenv\\Comments\\Facades\\Comments"
+            }
+        }
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "composer/package-versions-deprecated": true,
+            "pestphp/pest-plugin": true
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
