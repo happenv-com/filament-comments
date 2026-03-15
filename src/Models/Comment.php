@@ -33,13 +33,18 @@ use Illuminate\Support\Facades\Auth;
 #[UseFactory(CommentFactory::class)]
 class Comment extends Model implements HasRichContent
 {
+    /**
+     * @use HasFactory<CommentFactory>
+     */
     use HasFactory;
     use InteractsWithRichContent;
 
+    // @phpstan-ignore missingType.generics, missingType.generics
     public function author(): BelongsTo
     {
         $userModel = Auth::guard(Filament::getAuthGuard())->user()->getModel();
 
+        // @phpstan-ignore argument.type, argument.templateType
         return $this->belongsTo($userModel, 'author_id');
     }
 
@@ -60,7 +65,7 @@ class Comment extends Model implements HasRichContent
 
     public function setUpRichContent(): void
     {
-        if ($this->commentable()->getModel() !== null && method_exists($this->commentable()->getModel(), 'setUpCommentsRichContent')) {
+        if (method_exists($this->commentable()->getModel(), 'setUpCommentsRichContent')) {
             $decorator = $this->commentable()->getModel()->setUpCommentsRichContent($this);
 
             $decorator($this->registerRichContent('content'));

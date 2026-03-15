@@ -9,6 +9,7 @@ use Filament\Actions\Action;
 use Filament\Forms\Components\RichEditor;
 use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 use InvalidArgumentException;
 
 final class CommentFormSchema
@@ -42,7 +43,7 @@ final class CommentFormSchema
                 Actions::make([
                     Action::make('submit')
                         ->label(__('happenv-filament-comments::comments.submit'))
-                        ->icon(Phosphor::PaperPlaneTilt)
+                        ->icon(Heroicon::PaperAirplane)
                         ->action('submitComment'),
                 ])->alignEnd(),
             ]);
