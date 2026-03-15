@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Happenv\Comments\Filament\MentionProviders;
+namespace Happenv\FilamentComments\Filament\MentionProviders;
 
 use Filament\Forms\Components\RichEditor\MentionProvider;
 use Happenv\Core\Filament\Resources\Users\Pages\ViewUser;

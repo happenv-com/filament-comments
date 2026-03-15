@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Happenv\Comments\Enums;
+namespace Happenv\FilamentComments\Enums;
 
 enum CommentFormLocation: string
 {

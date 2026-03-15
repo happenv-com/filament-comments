@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Happenv\Comments\Filament\Components;
+namespace Happenv\FilamentComments\Filament\Components;
 
 use Closure;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Livewire;
-use Happenv\Comments\Enums\CommentFormLocation;
-use Happenv\Comments\Enums\CommentsPaginationLocation;
-use Happenv\Comments\Enums\CommentsPaginationType;
-use Happenv\Comments\Livewire\CommentsList;
+use Happenv\FilamentComments\Enums\CommentFormLocation;
+use Happenv\FilamentComments\Enums\CommentsPaginationLocation;
+use Happenv\FilamentComments\Enums\CommentsPaginationType;
+use Happenv\FilamentComments\Livewire\CommentsList;
 use Illuminate\Database\Eloquent\Model;
 use Override;
 

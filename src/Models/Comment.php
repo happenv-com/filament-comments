@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Happenv\Comments\Models;
+namespace Happenv\FilamentComments\Models;
 
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 use Filament\Forms\Components\RichEditor\Models\Concerns\InteractsWithRichContent;
 use Filament\Forms\Components\RichEditor\Models\Contracts\HasRichContent;
-use Happenv\Comments\Database\Factories\CommentFactory;
+use Happenv\FilamentComments\Database\Factories\CommentFactory;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

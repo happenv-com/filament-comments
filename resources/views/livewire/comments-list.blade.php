@@ -1,5 +1,5 @@
-@use ('Happenv\Comments\Enums\CommentFormLocation')
-@use ('Happenv\Comments\Enums\CommentsPaginationLocation')
+@use ('Happenv\FilamentComments\Enums\CommentFormLocation')
+@use ('Happenv\FilamentComments\Enums\CommentsPaginationLocation')
 
 <div
     class="grid gap-6"

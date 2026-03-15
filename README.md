@@ -15,7 +15,7 @@ composer require happenv-com/filament-comments
 Add the `HasComments` trait to any model that should support comments:
 
 ```php
-use Happenv\Comments\Concerns\HasComments;
+use Happenv\FilamentComments\Concerns\HasComments;
 
 class Issue extends Model
 {
@@ -28,7 +28,7 @@ class Issue extends Model
 Add the comments components to your Filament infolist or page:
 
 ```php
-use Happenv\Comments\Filament\Components\CommentsSection;
+use Happenv\FilamentComments\Filament\Components\CommentsSection;
 
 // In your infolist schema
 CommentsSection::make()

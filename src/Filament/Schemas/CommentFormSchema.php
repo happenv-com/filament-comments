@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Happenv\Comments\Filament\Schemas;
+namespace Happenv\FilamentComments\Filament\Schemas;
 
 use Filafly\Icons\Phosphor\Enums\Phosphor;
 use Filament\Actions\Action;

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Happenv\Comments\Filament\Components;
+namespace Happenv\FilamentComments\Filament\Components;
 
 use Filafly\Icons\Phosphor\Enums\Phosphor;
 use Filament\Actions\Action;
@@ -11,7 +11,7 @@ use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
-use Happenv\Comments\Livewire\CommentsList;
+use Happenv\FilamentComments\Livewire\CommentsList;
 use Illuminate\Database\Eloquent\Model;
 use Override;
 

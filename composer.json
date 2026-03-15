@@ -41,13 +41,13 @@
     },
     "autoload": {
         "psr-4": {
-            "Happenv\\Comments\\": "src/",
-            "Happenv\\Comments\\Database\\Factories\\": "database/factories/"
+            "Happenv\\FilamentComments\\": "src/",
+            "Happenv\\FilamentComments\\Database\\Factories\\": "database/factories/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Happenv\\Comments\\Tests\\": "tests/"
+            "Happenv\\FilamentComments\\Tests\\": "tests/"
         }
     },
     "scripts": {
@@ -62,10 +62,10 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Happenv\\Comments\\CommentsServiceProvider"
+                "Happenv\\FilamentComments\\CommentsServiceProvider"
             ],
             "aliases": {
-                "Comments": "Happenv\\Comments\\Facades\\Comments"
+                "Comments": "Happenv\\FilamentComments\\Facades\\Comments"
             }
         }
     },

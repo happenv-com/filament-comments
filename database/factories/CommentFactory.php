@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Happenv\Comments\Database\Factories;
+namespace Happenv\FilamentComments\Database\Factories;
 
-use Happenv\Comments\Models\Comment;
+use Happenv\FilamentComments\Models\Comment;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Auth;

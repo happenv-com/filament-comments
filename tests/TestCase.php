@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Happenv\Comments\Tests;
+namespace Happenv\FilamentComments\Tests;
 
-use Happenv\Comments\CommentsServiceProvider;
+use Happenv\FilamentComments\CommentsServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
 
 class TestCase extends Orchestra

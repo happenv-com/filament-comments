@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Happenv\Comments\Filament\Schemas;
+namespace Happenv\FilamentComments\Filament\Schemas;
 
 use Filament\Schemas\Schema;
-use Happenv\Comments\Filament\Components\Comment;
+use Happenv\FilamentComments\Filament\Components\Comment;
 
 final class CommentItemSchema
 {

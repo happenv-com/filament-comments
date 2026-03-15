@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use Happenv\Comments\Tests\TestCase;
+use Happenv\FilamentComments\Tests\TestCase;
 
 uses(
     TestCase::class,

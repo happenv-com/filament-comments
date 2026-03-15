@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Happenv\Comments;
+namespace Happenv\FilamentComments;
 
-use Happenv\Comments\Livewire\CommentsList;
+use Happenv\FilamentComments\Livewire\CommentsList;
 use Livewire\Livewire;
 use Override;
 use Spatie\LaravelPackageTools\Package;

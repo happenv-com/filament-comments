@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Happenv\Comments\Concerns;
+namespace Happenv\FilamentComments\Concerns;
 
-use Happenv\Comments\Models\Comment;
+use Happenv\FilamentComments\Models\Comment;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 

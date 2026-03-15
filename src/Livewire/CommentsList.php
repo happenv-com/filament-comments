@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Happenv\Comments\Livewire;
+namespace Happenv\FilamentComments\Livewire;
 
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
@@ -10,12 +10,12 @@ use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Schema;
-use Happenv\Comments\Enums\CommentFormLocation;
-use Happenv\Comments\Enums\CommentsPaginationLocation;
-use Happenv\Comments\Enums\CommentsPaginationType;
-use Happenv\Comments\Filament\Schemas\CommentFormSchema;
-use Happenv\Comments\Filament\Schemas\CommentItemSchema;
-use Happenv\Comments\Models\Comment;
+use Happenv\FilamentComments\Enums\CommentFormLocation;
+use Happenv\FilamentComments\Enums\CommentsPaginationLocation;
+use Happenv\FilamentComments\Enums\CommentsPaginationType;
+use Happenv\FilamentComments\Filament\Schemas\CommentFormSchema;
+use Happenv\FilamentComments\Filament\Schemas\CommentItemSchema;
+use Happenv\FilamentComments\Models\Comment;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
