@@ -207,7 +207,7 @@ class CommentsList extends LivewireComponent implements HasActions, HasForms
             return;
         }
 
-        Comment::query()->create([
+        resolve(Comment::class)::query()->create([
             'commentable_type' => $this->record->getMorphClass(),
             'commentable_id' => $this->record->getKey(),
             'author_id' => $user->id,
