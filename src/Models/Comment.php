@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace Happenv\FilamentComments\Models;
 
 use Carbon\CarbonInterface;
+use Filament\Facades\Filament;
 use Filament\Forms\Components\RichEditor\Models\Concerns\InteractsWithRichContent;
 use Filament\Forms\Components\RichEditor\Models\Contracts\HasRichContent;
 use Happenv\FilamentComments\Database\Factories\CommentFactory;
+use Happenv\FilamentComments\Filament\MentionProviders\UserMentionProvider;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -15,6 +17,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * @property string $id
@@ -34,12 +37,11 @@ class Comment extends Model implements HasRichContent
     use HasFactory;
     use InteractsWithRichContent;
 
-    /**
-     * @return BelongsTo<Authenticatable, $this>
-     */
     public function author(): BelongsTo
     {
-        return $this->belongsTo(Authenticatable::class, 'author_id');
+        $userModel = Auth::guard(Filament::getAuthGuard())->user()->getModel();
+        
+        return $this->belongsTo($userModel, 'author_id');
     }
 
     /**
@@ -60,7 +62,6 @@ class Comment extends Model implements HasRichContent
     public function setUpRichContent(): void
     {
         if ($this->commentable()->getModel() !== null && method_exists($this->commentable()->getModel(), 'setUpCommentsRichContent')) {
-
             $decorator = $this->commentable()->getModel()->setUpCommentsRichContent($this);
 
             $decorator($this->registerRichContent('content'));
@@ -68,6 +69,8 @@ class Comment extends Model implements HasRichContent
             return;
         }
 
-        $this->registerRichContent('content');
+        $this->registerRichContent('content')->mentions([
+            UserMentionProvider::make(),
+        ]);
     }
 }

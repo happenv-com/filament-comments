@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Happenv\FilamentComments\Filament\MentionProviders;
 
+use Filament\Facades\Filament;
 use Filament\Forms\Components\RichEditor\MentionProvider;
-use Happenv\Core\Filament\Resources\Users\Pages\ViewUser;
 use Illuminate\Support\Facades\Auth;
 
 final class UserMentionProvider
@@ -17,7 +17,7 @@ final class UserMentionProvider
 
     public function provide(string $char = '@'): MentionProvider
     {
-        $userModel = Auth::user()->getModel();
+        $userModel = Filament::getCurrentPanel()->auth()->user()->getModel();
 
         return MentionProvider::make($char)
             ->getSearchResultsUsing(fn (string $search): array => $userModel::query()
@@ -29,7 +29,6 @@ final class UserMentionProvider
             ->getLabelsUsing(fn (array $ids): array => $userModel::query()
                 ->whereIn('id', $ids)
                 ->pluck('name', 'id')
-                ->all())
-            ->url(fn (string $id, string $label): string => ViewUser::getUrl(['record' => $id]));
+                ->all());
     }
 }

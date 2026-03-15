@@ -83,8 +83,6 @@ class Comment extends Component
         $components = array_filter([
             $this->getAuthorComponent(),
             $this->getCreatedAtComponent(),
-
-            TextEntry::make('id'),
         ]);
 
         if ($components === []) {
