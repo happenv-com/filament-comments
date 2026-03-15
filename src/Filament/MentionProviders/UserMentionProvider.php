@@ -6,7 +6,6 @@ namespace Happenv\FilamentComments\Filament\MentionProviders;
 
 use Filament\Facades\Filament;
 use Filament\Forms\Components\RichEditor\MentionProvider;
-use Illuminate\Support\Facades\Auth;
 
 final class UserMentionProvider
 {

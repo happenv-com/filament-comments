@@ -65,7 +65,7 @@ class Comments extends Component
         return $this->evaluate($this->paginationType);
     }
 
-    public function paginationType(CommentsPaginationType | Closure $type): static
+    public function paginationType(CommentsPaginationType|Closure $type): static
     {
         $this->paginationType = $type;
 
@@ -77,7 +77,7 @@ class Comments extends Component
         return $this->evaluate($this->paginationDefaultPerPage);
     }
 
-    public function paginationDefaultPerPage(int | Closure $perPage): static
+    public function paginationDefaultPerPage(int|Closure $perPage): static
     {
         $this->paginationDefaultPerPage = $perPage;
 
@@ -95,7 +95,7 @@ class Comments extends Component
     /**
      * @param  int[]|Closure  $options
      */
-    public function paginationOptions(array | Closure $options): static
+    public function paginationOptions(array|Closure $options): static
     {
         $this->paginationOptions = $options;
 
@@ -107,14 +107,14 @@ class Comments extends Component
         return $this->evaluate($this->formLocation);
     }
 
-    public function formLocation(CommentFormLocation | Closure $location): static
+    public function formLocation(CommentFormLocation|Closure $location): static
     {
         $this->formLocation = $location;
 
         return $this;
     }
 
-    public function paginationLocation(CommentsPaginationLocation | Closure $location = CommentsPaginationLocation::Below): static
+    public function paginationLocation(CommentsPaginationLocation|Closure $location = CommentsPaginationLocation::Below): static
     {
         $this->paginationLocation = $location;
 
@@ -134,7 +134,7 @@ class Comments extends Component
     /**
      * @param  class-string|Closure  $provider
      */
-    public function mentionProvider(string | Closure $provider): static
+    public function mentionProvider(string|Closure $provider): static
     {
         $this->mentionProviders[] = $provider;
 

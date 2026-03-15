@@ -33,6 +33,9 @@ class CommentsList extends LivewireComponent implements HasActions, HasForms
     use InteractsWithForms;
     use WithPagination;
 
+    /**
+     * @var array<mixed>
+     */
     public array $data = [];
 
     public Model $record;
@@ -45,16 +48,22 @@ class CommentsList extends LivewireComponent implements HasActions, HasForms
 
     public CommentsPaginationType $paginationType;
 
-    public int | string $paginationPerPage;
+    public int|string $paginationPerPage;
 
+    /**
+     * @var int[]
+     */
     public array $paginationOptions;
 
     public string $formSchema = CommentFormSchema::class;
 
     public string $itemSchema = CommentItemSchema::class;
 
-    public string | int | null $commentId = null;
+    public string|int|null $commentId = null;
 
+    /**
+     * @var class-string[]
+     */
     public array $mentionProviders = [];
 
     public function getPageByCommentId(): int
@@ -85,7 +94,7 @@ class CommentsList extends LivewireComponent implements HasActions, HasForms
         CommentFormLocation $formLocation,
         CommentsPaginationLocation $paginationLocation,
         CommentsPaginationType $paginationType,
-        int | string $paginationPerPage,
+        int|string $paginationPerPage,
         array $paginationOptions,
         array $mentionProviders,
     ): void {
@@ -129,7 +138,7 @@ class CommentsList extends LivewireComponent implements HasActions, HasForms
 
     protected function getPaginationPageName(): string
     {
-        return $this->name . '_page';
+        return $this->name.'_page';
     }
 
     #[Computed]
@@ -178,7 +187,7 @@ class CommentsList extends LivewireComponent implements HasActions, HasForms
         }
 
         $this->form->fill([
-            'content' => $content . '<blockquote>' . str_replace("\n", "\n> ", $comment->content) . '</blockquote><p></p>',
+            'content' => $content.'<blockquote>'.str_replace("\n", "\n> ", $comment->content).'</blockquote><p></p>',
         ]);
 
     }
@@ -231,11 +240,14 @@ class CommentsList extends LivewireComponent implements HasActions, HasForms
         return view('happenv-filament-comments::livewire.comments-list');
     }
 
+    /**
+     * @return array<string,array<string,string>>
+     */
     protected function queryString(): array
     {
         return [
             'commentId' => [
-                'as' => $this->name . '_comment_id',
+                'as' => $this->name.'_comment_id',
             ],
         ];
     }

@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Happenv\FilamentComments\Filament\Components;
 
-use Filafly\Icons\Phosphor\Enums\Phosphor;
 use Filament\Actions\Action;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
+use Filament\Support\Icons\Heroicon;
 use Happenv\FilamentComments\Livewire\CommentsList;
 use Illuminate\Database\Eloquent\Model;
 use Override;
@@ -20,30 +20,35 @@ class Comment extends Component
     #[Override]
     protected string $view = 'filament-schemas::components.grid';
 
-    protected Component | null | false $authorComponent = null;
+    protected Component|null|false $authorComponent = null;
 
-    protected Component | null | false $headerComponent = null;
+    protected Component|null|false $headerComponent = null;
 
-    protected Component | null | false $contentComponent = null;
+    protected Component|null|false $contentComponent = null;
 
-    protected Component | null | false $footerComponent = null;
+    protected Component|null|false $footerComponent = null;
 
-    protected Component | null | false $createdAtComponent = null;
+    protected Component|null|false $createdAtComponent = null;
 
-    public function __construct()
+    public function __construct(public string $name = 'comment')
     {
         $this->configure();
 
         $this->schema($this->commentSchema());
     }
 
-    public static function make(): static
+    public static function make(string $name = 'comment'): static
     {
-        $static = resolve(static::class);
+        $static = resolve(static::class, [
+            'name' => $name,
+        ]);
 
         return $static;
     }
 
+    /**
+     * @return Component[]
+     */
     public function commentSchema(): array
     {
         $components = [
@@ -64,21 +69,21 @@ class Comment extends Component
         ];
     }
 
-    public function headerComponent(Component | null | false $component = null): static
+    public function headerComponent(Component|null|false $component = null): static
     {
         $this->headerComponent = $component;
 
         return $this;
     }
 
-    public function getHeaderComponent(): Component | null | false
+    public function getHeaderComponent(): Component|null|false
     {
         return $this->headerComponent !== null
         ? $this->evaluate($this->headerComponent)
         : $this->getDefaultHeaderComponent();
     }
 
-    public function getDefaultHeaderComponent(): Component | null | false
+    public function getDefaultHeaderComponent(): Component|null|false
     {
         $components = array_filter([
             $this->getAuthorComponent(),
@@ -93,21 +98,21 @@ class Comment extends Component
             ->schema($components);
     }
 
-    public function authorComponent(Component | null | false $component = null): static
+    public function authorComponent(Component|null|false $component = null): static
     {
         $this->authorComponent = $component;
 
         return $this;
     }
 
-    public function getAuthorComponent(): Component | null | false
+    public function getAuthorComponent(): Component|null|false
     {
         return $this->authorComponent !== null
         ? $this->evaluate($this->authorComponent)
         : $this->getDefaultAuthorComponent();
     }
 
-    public function getDefaultAuthorComponent(): Component | null | false
+    public function getDefaultAuthorComponent(): Component|null|false
     {
         return TextEntry::make('author.name')
             ->label('Created By')
@@ -115,21 +120,21 @@ class Comment extends Component
             ->columnSpan(1);
     }
 
-    public function createdAtComponent(Component | null | false $component = null): static
+    public function createdAtComponent(Component|null|false $component = null): static
     {
         $this->createdAtComponent = $component;
 
         return $this;
     }
 
-    public function getCreatedAtComponent(): Component | null | false
+    public function getCreatedAtComponent(): Component|null|false
     {
         return $this->createdAtComponent !== null
         ? $this->evaluate($this->createdAtComponent)
         : $this->getDefaultCreatedAtComponent();
     }
 
-    public function getDefaultCreatedAtComponent(): Component | null | false
+    public function getDefaultCreatedAtComponent(): Component|null|false
     {
         return TextEntry::make('created_at')
             ->hiddenLabel()
@@ -140,21 +145,21 @@ class Comment extends Component
             ->alignEnd();
     }
 
-    public function footerComponent(Component | null | false $component = null): static
+    public function footerComponent(Component|null|false $component = null): static
     {
         $this->footerComponent = $component;
 
         return $this;
     }
 
-    public function getFooterComponent(): Component | null | false
+    public function getFooterComponent(): Component|null|false
     {
         return $this->footerComponent !== null
         ? $this->evaluate($this->footerComponent)
         : $this->getDefaultFooterComponent();
     }
 
-    public function getDefaultFooterComponent(): Component | null | false
+    public function getDefaultFooterComponent(): Component|null|false
     {
         return Grid::make(2)
             ->schema([
@@ -163,28 +168,26 @@ class Comment extends Component
                         ->label(__('happenv-filament-comments::comments.quote'))
                         ->iconButton()
                         ->tooltip(__('happenv-filament-comments::comments.quote_tooltip'))
-
-                        ->icon(Phosphor::Quotes)
-                        // ->dispatch('quote-comment', fn (Model $record): array => ['commentId' => $record->id])
+                        ->icon(Heroicon::ChatBubbleBottomCenterText)
                         ->actionJs(function (Model $record, CommentsList $livewire): string {
-                            $formId = 'comment-form-' . $livewire->name;
+                            $formId = 'comment-form-'.$livewire->name;
 
                             return <<<"SCRIPT"
-                            \$wire.dispatch('quote-comment', { commentId: '{$record->id}' });
-                            const formElement = document.getElementById('{$formId}');
-                            if (formElement) {
-                                formElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                            }
-                        SCRIPT;
+                                \$wire.dispatch('quote-comment', { commentId: '{$record->id}' });
+                                const formElement = document.getElementById('{$formId}');
+                                if (formElement) {
+                                    formElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                }
+                            SCRIPT;
                         }),
 
                     Action::make('share')
                         ->label(__('happenv-filament-comments::comments.share'))
                         ->iconButton()
                         ->tooltip(__('happenv-filament-comments::comments.copy_link'))
-                        ->icon(Phosphor::Link)
+                        ->icon(Heroicon::Link)
                         ->actionJs(function (Model $record, CommentsList $livewire): string {
-                            $paramName = $livewire->name . '_comment_id';
+                            $paramName = $livewire->name.'_comment_id';
 
                             $copyMessage = __('filament-forms::components.text_input.actions.copy.message');
 
@@ -201,28 +204,28 @@ class Comment extends Component
                                     console.error('Error copying comment URL:', error);
                                     alert('Failed to copy comment URL.');
                                 });
-                        SCRIPT;
+                            SCRIPT;
                         }),
                 ])->alignStart(),
 
             ]);
     }
 
-    public function getDefaultContentComponent(): Component | null | false
+    public function getDefaultContentComponent(): Component|null|false
     {
         return TextEntry::make('content')
             ->hiddenLabel()
             ->prose();
     }
 
-    public function contentComponent(Component | null | false $component = null): static
+    public function contentComponent(Component|null|false $component = null): static
     {
         $this->contentComponent = $component;
 
         return $this;
     }
 
-    public function getContentComponent(): Component | null | false
+    public function getContentComponent(): Component|null|false
     {
         return $this->contentComponent !== null
         ? $this->evaluate($this->contentComponent)

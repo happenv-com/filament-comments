@@ -22,12 +22,12 @@ class FilamentCommentsServiceProvider extends PackageServiceProvider
             ->discoversMigrations();
     }
 
-    public function packageRegistered()
+    public function packageRegistered(): void
     {
         $this->app->bindIf(Comment::class, Comment::class);
     }
 
-    public function packageBooted()
+    public function packageBooted(): void
     {
         Livewire::component('happenv-filament-comments-list', CommentsList::class);
     }

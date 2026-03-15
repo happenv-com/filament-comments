@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 /**
  * @mixin Model
  */
+// @phpstan-ignore trait.unused
 trait HasComments
 {
     public function comments(): MorphMany

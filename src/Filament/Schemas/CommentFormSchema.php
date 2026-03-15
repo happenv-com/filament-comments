@@ -9,9 +9,15 @@ use Filament\Actions\Action;
 use Filament\Forms\Components\RichEditor;
 use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Schema;
+use InvalidArgumentException;
 
 final class CommentFormSchema
 {
+    /**
+     * @param  class-string[]  $mentionProviders
+     *
+     * @throws InvalidArgumentException
+     */
     public static function configure(Schema $schema, array $mentionProviders = []): Schema
     {
         $mentions = array_map(static fn (string $provider) => resolve($provider)::make(), $mentionProviders);
