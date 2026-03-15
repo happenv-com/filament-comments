@@ -62,7 +62,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Happenv\\FilamentComments\\CommentsServiceProvider"
+                "Happenv\\FilamentComments\\FilamentCommentsServiceProvider"
             ],
             "aliases": {
                 "Comments": "Happenv\\FilamentComments\\Facades\\Comments"
