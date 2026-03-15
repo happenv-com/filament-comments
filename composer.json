@@ -7,7 +7,6 @@
         "filamentphp",
         "comments"
     ],
-    "version": "1.0.0",
     "homepage": "https://happenv.com",
     "support": {
         "issues": "https://github.com/happenv-com/filament-comments/issues",
