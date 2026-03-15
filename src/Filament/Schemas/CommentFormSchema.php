@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Happenv\FilamentComments\Filament\Schemas;
 
-use Filafly\Icons\Phosphor\Enums\Phosphor;
 use Filament\Actions\Action;
 use Filament\Forms\Components\RichEditor;
 use Filament\Schemas\Components\Actions;

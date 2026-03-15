@@ -37,6 +37,7 @@ class Comment extends Model implements HasRichContent
      * @use HasFactory<CommentFactory>
      */
     use HasFactory;
+
     use InteractsWithRichContent;
 
     // @phpstan-ignore missingType.generics, missingType.generics
