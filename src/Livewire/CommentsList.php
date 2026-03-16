@@ -172,7 +172,7 @@ class CommentsList extends LivewireComponent implements HasActions, HasForms
     #[On('quote-comment')]
     public function quoteComment($commentId): void
     {
-        $comment = Comment::query()->whereKey($commentId)->first();
+        $comment = resolve(Comment::class)::query()->whereKey($commentId)->first();
 
         if ($comment === null) {
             return;
