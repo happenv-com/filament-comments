@@ -55,9 +55,15 @@ class CommentsList extends LivewireComponent implements HasActions, HasForms
      */
     public array $paginationOptions;
 
-    public string $formSchema = CommentFormSchema::class;
+    /**
+     * @var class-string
+     */
+    public string $formSchema;
 
-    public string $itemSchema = CommentItemSchema::class;
+    /**
+     * @var class-string
+     */
+    public string $itemSchema;
 
     public string|int|null $commentId = null;
 
@@ -65,6 +71,13 @@ class CommentsList extends LivewireComponent implements HasActions, HasForms
      * @var class-string[]
      */
     public array $mentionProviders = [];
+
+    public string $commentItemContentFieldName;
+
+    /**
+     * @var class-string
+     */
+    public string $commentItemComponent;
 
     public function getPageByCommentId(): int
     {
@@ -96,7 +109,24 @@ class CommentsList extends LivewireComponent implements HasActions, HasForms
         CommentsPaginationType $paginationType,
         int|string $paginationPerPage,
         array $paginationOptions,
+         /**
+         * @param class-string $mentionProviders
+         */
         array $mentionProviders,
+        /**
+         * @param class-string $formSchema
+         */
+        string $formSchema,
+        /**
+         * @param class-string $itemSchema
+         */
+        string $itemSchema,
+
+        string $commentItemContentFieldName,
+        /**
+         * @param class-string $commentItemComponent
+         */
+        string $commentItemComponent,
     ): void {
         $this->record = $record;
         $this->name = $name;
@@ -106,6 +136,11 @@ class CommentsList extends LivewireComponent implements HasActions, HasForms
         $this->paginationPerPage = $paginationPerPage;
         $this->paginationOptions = $paginationOptions;
         $this->mentionProviders = $mentionProviders;
+        $this->formSchema = $formSchema;
+        $this->itemSchema = $itemSchema;
+        $this->commentItemContentFieldName = $commentItemContentFieldName;
+        $this->commentItemComponent = $commentItemComponent;
+
 
         // If a commentId is present in the query string, we want to set the pagination to the page where the comment is located and highlight the comment.
         if ($this->commentId !== null && ($pageByCommentId = $this->getPageByCommentId()) !== null) {
@@ -156,7 +191,7 @@ class CommentsList extends LivewireComponent implements HasActions, HasForms
 
     public function commentItem(Model $record): Schema
     {
-        return $this->itemSchema::configure(Schema::make($this))
+        return $this->itemSchema::configure(Schema::make($this), $this->commentItemContentFieldName, $this->commentItemComponent)
             ->record($record);
     }
 
@@ -164,7 +199,8 @@ class CommentsList extends LivewireComponent implements HasActions, HasForms
     {
         return $this->formSchema::configure(
             Schema::make($this),
-            $this->mentionProviders
+            $this->mentionProviders,
+            $this->commentItemContentFieldName,
         )
             ->statePath('data');
     }
@@ -172,7 +208,7 @@ class CommentsList extends LivewireComponent implements HasActions, HasForms
     #[On('quote-comment')]
     public function quoteComment($commentId): void
     {
-        $comment = resolve(Comment::class)::query()->whereKey($commentId)->first();
+        $comment = $this->record->comments()->whereKey($commentId)->first();
 
         if ($comment === null) {
             return;
@@ -180,14 +216,14 @@ class CommentsList extends LivewireComponent implements HasActions, HasForms
 
         $state = $this->form->getStateSnapshot();
 
-        $content = $state['content'] ?? '';
+        $content = $state[$this->commentItemContentFieldName] ?? '';
 
         if ($content === '<p></p>') {
             $content = '';
         }
 
         $this->form->fill([
-            'content' => $content.'<blockquote>'.str_replace("\n", "\n> ", $comment->content).'</blockquote><p></p>',
+            $this->commentItemContentFieldName => $content.'<blockquote>'.str_replace("\n", "\n> ", $comment->content).'</blockquote><p></p>',
         ]);
 
     }
@@ -207,7 +243,7 @@ class CommentsList extends LivewireComponent implements HasActions, HasForms
 
         $data = $this->form->getState();
 
-        if ($data['content'] === null) {
+        if ($data[$this->commentItemContentFieldName] === null) {
             Notification::make()
                 ->danger()
                 ->title(__('happenv-filament-comments::comments.empty_comment'))
@@ -215,13 +251,12 @@ class CommentsList extends LivewireComponent implements HasActions, HasForms
 
             return;
         }
+        $comment = $this->record->comments()->getRelated();
+        $comment->{$this->commentItemContentFieldName} = $data[$this->commentItemContentFieldName];
 
-        resolve(Comment::class)::query()->create([
-            'commentable_type' => $this->record->getMorphClass(),
-            'commentable_id' => $this->record->getKey(),
-            'author_id' => $user->id,
-            'content' => $data['content'],
-        ]);
+        $comment->author()->associate($user);
+        
+        $this->record->comments()->save($comment);
 
         $this->form->fill();
 

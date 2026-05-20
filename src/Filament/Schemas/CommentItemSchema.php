@@ -9,11 +9,11 @@ use Happenv\FilamentComments\Filament\Components\Comment;
 
 final class CommentItemSchema
 {
-    public static function configure(Schema $schema): Schema
+    public static function configure(Schema $schema, string $commentContentFieldName = 'content', string $commentItemComponent = Comment::class): Schema
     {
         return $schema
             ->components([
-                Comment::make('comment'),
+                $commentItemComponent::make($commentContentFieldName),
             ]);
     }
 }
