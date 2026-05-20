@@ -10,11 +10,10 @@ use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Schema;
+use Happenv\FilamentComments\Enums\CommentFormat;
 use Happenv\FilamentComments\Enums\CommentFormLocation;
 use Happenv\FilamentComments\Enums\CommentsPaginationLocation;
 use Happenv\FilamentComments\Enums\CommentsPaginationType;
-use Happenv\FilamentComments\Filament\Schemas\CommentFormSchema;
-use Happenv\FilamentComments\Filament\Schemas\CommentItemSchema;
 use Happenv\FilamentComments\Models\Comment;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
@@ -79,6 +78,8 @@ class CommentsList extends LivewireComponent implements HasActions, HasForms
      */
     public string $commentItemComponent;
 
+    public CommentFormat $commentFormat;
+
     public function getPageByCommentId(): int
     {
         if ($this->commentId === null) {
@@ -109,24 +110,26 @@ class CommentsList extends LivewireComponent implements HasActions, HasForms
         CommentsPaginationType $paginationType,
         int|string $paginationPerPage,
         array $paginationOptions,
-         /**
-         * @param class-string $mentionProviders
+        /**
+         * @param  class-string  $mentionProviders
          */
         array $mentionProviders,
         /**
-         * @param class-string $formSchema
+         * @param  class-string  $formSchema
          */
         string $formSchema,
         /**
-         * @param class-string $itemSchema
+         * @param  class-string  $itemSchema
          */
         string $itemSchema,
 
         string $commentItemContentFieldName,
         /**
-         * @param class-string $commentItemComponent
+         * @param  class-string  $commentItemComponent
          */
         string $commentItemComponent,
+
+        CommentFormat $commentFormat,
     ): void {
         $this->record = $record;
         $this->name = $name;
@@ -140,7 +143,7 @@ class CommentsList extends LivewireComponent implements HasActions, HasForms
         $this->itemSchema = $itemSchema;
         $this->commentItemContentFieldName = $commentItemContentFieldName;
         $this->commentItemComponent = $commentItemComponent;
-
+        $this->commentFormat = $commentFormat;
 
         // If a commentId is present in the query string, we want to set the pagination to the page where the comment is located and highlight the comment.
         if ($this->commentId !== null && ($pageByCommentId = $this->getPageByCommentId()) !== null) {
@@ -191,7 +194,7 @@ class CommentsList extends LivewireComponent implements HasActions, HasForms
 
     public function commentItem(Model $record): Schema
     {
-        return $this->itemSchema::configure(Schema::make($this), $this->commentItemContentFieldName, $this->commentItemComponent)
+        return $this->itemSchema::configure(Schema::make($this), $this->commentItemContentFieldName, $this->commentItemComponent, $this->commentFormat)
             ->record($record);
     }
 
@@ -201,6 +204,7 @@ class CommentsList extends LivewireComponent implements HasActions, HasForms
             Schema::make($this),
             $this->mentionProviders,
             $this->commentItemContentFieldName,
+            $this->commentFormat
         )
             ->statePath('data');
     }
@@ -255,7 +259,7 @@ class CommentsList extends LivewireComponent implements HasActions, HasForms
         $comment->{$this->commentItemContentFieldName} = $data[$this->commentItemContentFieldName];
 
         $comment->author()->associate($user);
-        
+
         $this->record->comments()->save($comment);
 
         $this->form->fill();

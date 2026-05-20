@@ -7,6 +7,7 @@ namespace Happenv\FilamentComments\Filament\Components;
 use Closure;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Livewire;
+use Happenv\FilamentComments\Enums\CommentFormat;
 use Happenv\FilamentComments\Enums\CommentFormLocation;
 use Happenv\FilamentComments\Enums\CommentsPaginationLocation;
 use Happenv\FilamentComments\Enums\CommentsPaginationType;
@@ -50,6 +51,8 @@ class Comments extends Component
     protected string $commentContentFieldName = 'content';
 
     protected string $commentItemComponent = Comment::class;
+
+    protected CommentFormat $commentFormat = CommentFormat::Html;
 
     public function __construct(protected string $name) {}
 
@@ -220,6 +223,18 @@ class Comments extends Component
         return $this->evaluate($this->commentItemComponent);
     }
 
+    public function commentFormat(CommentFormat|Closure $format): static
+    {
+        $this->commentFormat = $format;
+
+        return $this;
+    }
+
+    public function getCommentFormat(): CommentFormat
+    {
+        return $this->evaluate($this->commentFormat);
+    }
+
     public function configureSchema(): static
     {
 
@@ -237,6 +252,7 @@ class Comments extends Component
                 'itemSchema' => $this->getItemSchema(),
                 'commentItemContentFieldName' => $this->getCommentItemContentFieldName(),
                 'commentItemComponent' => $this->getCommentItemComponent(),
+                'commentFormat' => $this->getCommentFormat(),
             ])
                 ->columnSpanFull(),
         ]);
