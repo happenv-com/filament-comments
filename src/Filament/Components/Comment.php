@@ -216,7 +216,7 @@ class Comment extends Component
 
     public function getDefaultContentComponent(): Component|null|false
     {
-        $component = TextEntry::make('content')
+        $component = TextEntry::make($this->name)
             ->hiddenLabel();
 
         if ($this->isMarkdown()) {
