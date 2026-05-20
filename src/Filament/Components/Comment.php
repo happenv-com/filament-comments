@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Happenv\FilamentComments\Filament\Components;
 
+use Closure;
 use Filament\Actions\Action;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Actions;
@@ -29,6 +30,8 @@ class Comment extends Component
     protected Component|null|false $footerComponent = null;
 
     protected Component|null|false $createdAtComponent = null;
+
+    protected bool $markdown = true;
 
     public function __construct(public string $name = 'comment')
     {
@@ -213,9 +216,18 @@ class Comment extends Component
 
     public function getDefaultContentComponent(): Component|null|false
     {
-        return TextEntry::make('content')
-            ->hiddenLabel()
-            ->prose();
+        $component = TextEntry::make('content')
+            ->hiddenLabel();
+
+        if ($this->isMarkdown()) {
+            $component = $component
+                ->markdown()
+                ->nl2br();
+        } else {
+            $component = $component->prose();
+        }
+
+        return $component;
     }
 
     public function contentComponent(Component|null|false $component = null): static
@@ -230,5 +242,17 @@ class Comment extends Component
         return $this->contentComponent !== null
         ? $this->evaluate($this->contentComponent)
         : $this->getDefaultContentComponent();
+    }
+
+    public function markdown(bool|Closure $condition = true): self
+    {
+        $this->markdown = $condition;
+
+        return $this;
+    }
+
+    public function isMarkdown(): bool
+    {
+        return $this->evaluate($this->markdown);
     }
 }

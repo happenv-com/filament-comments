@@ -5,15 +5,21 @@ declare(strict_types=1);
 namespace Happenv\FilamentComments\Filament\Schemas;
 
 use Filament\Schemas\Schema;
+use Happenv\FilamentComments\Enums\CommentFormat;
 use Happenv\FilamentComments\Filament\Components\Comment;
 
 final class CommentItemSchema
 {
-    public static function configure(Schema $schema, string $commentContentFieldName = 'content', string $commentItemComponent = Comment::class): Schema
-    {
+    public static function configure(
+        Schema $schema,
+        string $commentContentFieldName = 'content',
+        string $commentItemComponent = Comment::class,
+        CommentFormat $commentFormat = CommentFormat::Html
+    ): Schema {
         return $schema
             ->components([
-                $commentItemComponent::make($commentContentFieldName),
+                $commentItemComponent::make($commentContentFieldName)
+                    ->markdown(),
             ]);
     }
 }
