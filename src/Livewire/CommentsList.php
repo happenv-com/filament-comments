@@ -212,7 +212,7 @@ class CommentsList extends LivewireComponent implements HasActions, HasForms
     #[On('quote-comment')]
     public function quoteComment($commentId): void
     {
-        $comment = $this->record->comments()->whereKey($commentId)->first();
+        $comment = $this->record->{$this->name}()->whereKey($commentId)->first();
 
         if ($comment === null) {
             return;
@@ -255,12 +255,12 @@ class CommentsList extends LivewireComponent implements HasActions, HasForms
 
             return;
         }
-        $comment = $this->record->comments()->getRelated();
+        $comment = $this->record->{$this->name}()->getRelated();
         $comment->{$this->commentItemContentFieldName} = $data[$this->commentItemContentFieldName];
 
         $comment->author()->associate($user);
 
-        $this->record->comments()->save($comment);
+        $this->record->{$this->name}()->save($comment);
 
         $this->form->fill();
 
