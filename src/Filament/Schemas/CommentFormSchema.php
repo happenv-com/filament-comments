@@ -18,13 +18,13 @@ final class CommentFormSchema
      *
      * @throws InvalidArgumentException
      */
-    public static function configure(Schema $schema, array $mentionProviders = []): Schema
+    public static function configure(Schema $schema, array $mentionProviders = [], string $commentContentFieldName = 'content'): Schema
     {
         $mentions = array_map(static fn (string $provider) => resolve($provider)::make(), $mentionProviders);
 
         return $schema
             ->components([
-                RichEditor::make('content')
+                RichEditor::make($commentContentFieldName)
                     ->hiddenLabel()
                     ->toolbarButtons([
                         'bold',

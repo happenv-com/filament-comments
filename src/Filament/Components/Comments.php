@@ -10,6 +10,8 @@ use Filament\Schemas\Components\Livewire;
 use Happenv\FilamentComments\Enums\CommentFormLocation;
 use Happenv\FilamentComments\Enums\CommentsPaginationLocation;
 use Happenv\FilamentComments\Enums\CommentsPaginationType;
+use Happenv\FilamentComments\Filament\Schemas\CommentFormSchema;
+use Happenv\FilamentComments\Filament\Schemas\CommentItemSchema;
 use Happenv\FilamentComments\Livewire\CommentsList;
 use Illuminate\Database\Eloquent\Model;
 use Override;
@@ -40,6 +42,14 @@ class Comments extends Component
     protected array $paginationOptions = [10, 20, 50];
 
     protected CommentsPaginationType $paginationType = CommentsPaginationType::Simple;
+
+    protected string $formSchema = CommentFormSchema::class;
+
+    protected string $itemSchema = CommentItemSchema::class;
+
+    protected string $commentContentFieldName = 'content';
+
+    protected string $commentItemComponent = Comment::class;
 
     public function __construct(protected string $name) {}
 
@@ -162,6 +172,54 @@ class Comments extends Component
         return array_map(fn (string $provider): mixed => $this->evaluate($provider), $this->mentionProviders);
     }
 
+    public function itemSchema(string|Closure $schema): static
+    {
+        $this->itemSchema = $schema;
+
+        return $this;
+    }
+
+    public function formSchema(string|Closure $schema): static
+    {
+        $this->formSchema = $schema;
+
+        return $this;
+    }
+
+    public function getItemSchema(): string
+    {
+        return $this->evaluate($this->itemSchema);
+    }
+
+    public function getFormSchema(): string
+    {
+        return $this->evaluate($this->formSchema);
+    }
+
+    public function commentItemContentFieldName(string|Closure $fieldName): static
+    {
+        $this->commentContentFieldName = $fieldName;
+
+        return $this;
+    }
+
+    public function getCommentItemContentFieldName(): string
+    {
+        return $this->evaluate($this->commentContentFieldName) ?? 'content';
+    }
+
+    public function commentItemComponent(string|Closure $component): static
+    {
+        $this->commentItemComponent = $component;
+
+        return $this;
+    }
+
+    public function getCommentItemComponent(): string
+    {
+        return $this->evaluate($this->commentItemComponent);
+    }
+
     public function configureSchema(): static
     {
 
@@ -175,6 +233,10 @@ class Comments extends Component
                 'paginationPerPage' => $this->getPaginationDefaultPerPage(),
                 'paginationOptions' => $this->getPaginationOptions(),
                 'mentionProviders' => $this->getMentionProviders(),
+                'formSchema' => $this->getFormSchema(),
+                'itemSchema' => $this->getItemSchema(),
+                'commentItemContentFieldName' => $this->getCommentItemContentFieldName(),
+                'commentItemComponent' => $this->getCommentItemComponent(),
             ])
                 ->columnSpanFull(),
         ]);
