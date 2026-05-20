@@ -7,6 +7,7 @@ namespace Happenv\FilamentComments\Filament\Components;
 use Closure;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Livewire;
+use Happenv\FilamentComments\Actions\SaveCommentAction;
 use Happenv\FilamentComments\Enums\CommentFormat;
 use Happenv\FilamentComments\Enums\CommentFormLocation;
 use Happenv\FilamentComments\Enums\CommentsPaginationLocation;
@@ -55,6 +56,8 @@ class Comments extends Component
     protected CommentFormat $commentFormat = CommentFormat::Html;
 
     protected string $sortColumn = 'created_at';
+
+    protected string|Closure $saveAction = SaveCommentAction::class;
 
     public function __construct(protected string $name) {}
 
@@ -248,6 +251,18 @@ class Comments extends Component
         return $this->evaluate($this->sortColumn) ?? 'created_at';
     }
 
+    public function saveAction(string|Closure $action): static
+    {
+        $this->saveAction = $action;
+
+        return $this;
+    }
+
+    public function getSaveAction(): ?string
+    {
+        return $this->evaluate($this->saveAction);
+    }
+
     public function configureSchema(): static
     {
 
@@ -267,6 +282,7 @@ class Comments extends Component
                 'commentItemComponent' => $this->getCommentItemComponent(),
                 'commentFormat' => $this->getCommentFormat(),
                 'sortColumn' => $this->getSortColumn(),
+                'saveAction' => $this->getSaveAction(),
             ])->columnSpanFull(),
         ]);
 

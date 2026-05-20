@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Happenv\FilamentComments\Livewire;
 
+use Closure;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -15,6 +16,7 @@ use Happenv\FilamentComments\Enums\CommentFormLocation;
 use Happenv\FilamentComments\Enums\CommentsPaginationLocation;
 use Happenv\FilamentComments\Enums\CommentsPaginationType;
 use Happenv\FilamentComments\Models\Comment;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
@@ -82,6 +84,8 @@ class CommentsList extends LivewireComponent implements HasActions, HasForms
 
     public string $sortColumn;
 
+    public string $saveAction;
+
     public function getPageByCommentId(): int
     {
         if ($this->commentId === null) {
@@ -132,7 +136,8 @@ class CommentsList extends LivewireComponent implements HasActions, HasForms
         string $commentItemComponent,
 
         CommentFormat $commentFormat,
-        string $sortColumn
+        string $sortColumn,
+        string $saveAction,
     ): void {
         $this->record = $record;
         $this->name = $name;
@@ -148,6 +153,7 @@ class CommentsList extends LivewireComponent implements HasActions, HasForms
         $this->commentItemComponent = $commentItemComponent;
         $this->commentFormat = $commentFormat;
         $this->sortColumn = $sortColumn;
+        $this->saveAction = $saveAction;
 
         // If a commentId is present in the query string, we want to set the pagination to the page where the comment is located and highlight the comment.
         if ($this->commentId !== null && ($pageByCommentId = $this->getPageByCommentId()) !== null) {
@@ -235,7 +241,6 @@ class CommentsList extends LivewireComponent implements HasActions, HasForms
         ]);
 
     }
-
     public function submitComment(): void
     {
         $user = Auth::user();
@@ -259,12 +264,8 @@ class CommentsList extends LivewireComponent implements HasActions, HasForms
 
             return;
         }
-        $comment = $this->record->{$this->name}()->getRelated();
-        $comment->{$this->commentItemContentFieldName} = $data[$this->commentItemContentFieldName];
 
-        $comment->author()->associate($user);
-
-        $this->record->{$this->name}()->save($comment);
+        resolve($this->saveAction)($this->record, $data, $user, $this->name, $this->commentItemContentFieldName);
 
         $this->form->fill();
 
@@ -276,6 +277,7 @@ class CommentsList extends LivewireComponent implements HasActions, HasForms
             ->success()
             ->title(__('happenv-filament-comments::comments.comment_added'))
             ->send();
+            
     }
 
     public function render(): View
