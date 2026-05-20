@@ -80,6 +80,8 @@ class CommentsList extends LivewireComponent implements HasActions, HasForms
 
     public CommentFormat $commentFormat;
 
+    public string $sortColumn;
+
     public function getPageByCommentId(): int
     {
         if ($this->commentId === null) {
@@ -130,6 +132,7 @@ class CommentsList extends LivewireComponent implements HasActions, HasForms
         string $commentItemComponent,
 
         CommentFormat $commentFormat,
+        string $sortColumn
     ): void {
         $this->record = $record;
         $this->name = $name;
@@ -144,6 +147,7 @@ class CommentsList extends LivewireComponent implements HasActions, HasForms
         $this->commentItemContentFieldName = $commentItemContentFieldName;
         $this->commentItemComponent = $commentItemComponent;
         $this->commentFormat = $commentFormat;
+        $this->sortColumn = $sortColumn;
 
         // If a commentId is present in the query string, we want to set the pagination to the page where the comment is located and highlight the comment.
         if ($this->commentId !== null && ($pageByCommentId = $this->getPageByCommentId()) !== null) {
@@ -163,7 +167,7 @@ class CommentsList extends LivewireComponent implements HasActions, HasForms
     {
         $comments = $this->record->{$this->name}();
 
-        $comments = $comments->latest();
+        $comments = $comments->orderBy($this->sortColumn, 'desc');
 
         $comments = match ($this->paginationType) {
             CommentsPaginationType::Simple => $comments->simplePaginate($this->paginationPerPage, pageName: $this->getPaginationPageName()),

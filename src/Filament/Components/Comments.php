@@ -54,6 +54,8 @@ class Comments extends Component
 
     protected CommentFormat $commentFormat = CommentFormat::Html;
 
+    protected string $sortColumn = 'created_at';
+
     public function __construct(protected string $name) {}
 
     public static function make(string $name = 'comments'): static
@@ -235,6 +237,17 @@ class Comments extends Component
         return $this->evaluate($this->commentFormat);
     }
 
+    public function sortColumn(string|Closure $column): static
+    {
+        $this->sortColumn = $column;
+        return $this;
+    }
+
+    public function getSortColumn(): string
+    {
+        return $this->evaluate($this->sortColumn) ?? 'created_at';
+    }
+
     public function configureSchema(): static
     {
 
@@ -253,8 +266,8 @@ class Comments extends Component
                 'commentItemContentFieldName' => $this->getCommentItemContentFieldName(),
                 'commentItemComponent' => $this->getCommentItemComponent(),
                 'commentFormat' => $this->getCommentFormat(),
-            ])
-                ->columnSpanFull(),
+                'sortColumn' => $this->getSortColumn(),
+            ])->columnSpanFull(),
         ]);
 
         return $this;
