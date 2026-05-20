@@ -267,8 +267,6 @@ class CommentsList extends LivewireComponent implements HasActions, HasForms
 
         resolve($this->saveAction)($this->record, $data, $user, $this->name, $this->commentItemContentFieldName);
 
-        $this->form->fill();
-
         $this->dispatch('comment-added');
         $this->js('$wire.$refresh()');
         $this->setPage(0, $this->getPaginationPageName());

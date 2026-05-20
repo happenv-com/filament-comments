@@ -18,6 +18,9 @@ use Illuminate\Database\Eloquent\Model;
 
         $comment = $record->{$relationName}()->save($comment);
 
+        $comment->fill($data);
+        $comment->save();
+
         return $comment;
     }
 }
