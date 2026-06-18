@@ -2,7 +2,7 @@
 
 return [
     'add_comment_placeholder' => 'Write a comment...',
-    'submit' => 'Comment',
+    'submit' => 'Submit',
     'comment_added' => 'Comment added',
     'not_authenticated' => 'You must be logged in to comment',
     'empty_comment' => 'Comment cannot be empty',
