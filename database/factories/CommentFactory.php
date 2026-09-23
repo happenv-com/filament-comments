@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Happenv\FilamentComments\Database\Factories;
 
 use Happenv\FilamentComments\Models\Comment;
+use Happenv\FilamentComments\Support\AuthorModel;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Facades\Auth;
 use Override;
 
 /**
@@ -25,14 +25,14 @@ class CommentFactory extends Factory
     {
         return [
             'content' => fake()->paragraph(),
-            'author_id' => Auth::user()->getModel()::factory(),
+            'author_id' => fn (): mixed => AuthorModel::resolve()::factory(),
         ];
     }
 
     public function withAuthor(Authenticatable $author): static
     {
         return $this->state(fn (): array => [
-            'author_id' => $author->id,
+            'author_id' => $author->getAuthIdentifier(),
         ]);
     }
 }

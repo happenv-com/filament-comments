@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Happenv\FilamentComments\Livewire;
 
-use Closure;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -13,17 +12,23 @@ use Filament\Notifications\Notification;
 use Filament\Schemas\Schema;
 use Happenv\FilamentComments\Enums\CommentFormat;
 use Happenv\FilamentComments\Enums\CommentFormLocation;
-use Happenv\FilamentComments\Enums\CommentsPaginationLocation;
 use Happenv\FilamentComments\Enums\CommentsPaginationType;
-use Happenv\FilamentComments\Models\Comment;
-use Illuminate\Contracts\Auth\Authenticatable;
+use Happenv\FilamentComments\Support\CommentsSettings;
+use Illuminate\Contracts\Pagination\CursorPaginator;
+use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOneOrMany;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Pagination\Cursor;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
-use Livewire\Attributes\Computed;
-use Livewire\Attributes\On;
+use InvalidArgumentException;
+use Livewire\Attributes\Locked;
 use Livewire\Component as LivewireComponent;
 use Livewire\WithPagination;
+use ReflectionMethod;
+use ReflectionNamedType;
 
 /**
  * @property-read Schema $form
@@ -35,214 +40,140 @@ class CommentsList extends LivewireComponent implements HasActions, HasForms
     use WithPagination;
 
     /**
-     * @var array<mixed>
+     * State of the comment form.
+     *
+     * @var array<string, mixed>
      */
     public array $data = [];
 
+    /**
+     * @var view-string
+     */
+    // @phpstan-ignore property.defaultValue
+    protected string $view = 'happenv-filament-comments::livewire.comments-list';
+
+    #[Locked]
     public Model $record;
 
-    public string $name;
-
-    public CommentFormLocation $formLocation;
-
-    public CommentsPaginationLocation $paginationLocation;
-
-    public CommentsPaginationType $paginationType;
-
-    public int|string $paginationPerPage;
+    #[Locked]
+    public CommentsSettings $settings;
 
     /**
-     * @var int[]
+     * Page size picked by the user. Always read through `getPerPage()`, which clamps it to the allowed options.
      */
-    public array $paginationOptions;
+    public int|string|null $perPage = null;
 
     /**
-     * @var class-string
+     * Comment to open and highlight, taken from the query string.
      */
-    public string $formSchema;
-
-    /**
-     * @var class-string
-     */
-    public string $itemSchema;
-
     public string|int|null $commentId = null;
 
-    /**
-     * @var class-string[]
-     */
-    public array $mentionProviders = [];
-
-    public string $commentItemContentFieldName;
-
-    /**
-     * @var class-string
-     */
-    public string $commentItemComponent;
-
-    public CommentFormat $commentFormat;
-
-    public string $sortColumn;
-
-    public string $saveAction;
-
-    public function getPageByCommentId(): int
+    public function mount(Model $record, CommentsSettings $settings): void
     {
-        if ($this->commentId === null) {
-            return 1;
-        }
-
-        $targetComment = $this->record->{$this->name}()
-            ->whereKey($this->commentId)
-            ->first(['created_at']);
-
-        if ($targetComment === null) {
-            return 1;
-        }
-
-        // Count comments that come before target (latest() = DESC, so count where created_at > target)
-        $position = $this->record->{$this->name}()
-            ->where('created_at', '>', $targetComment->created_at)
-            ->count();
-
-        return (int) floor($position / $this->paginationPerPage) + 1;
-    }
-
-    public function mount(
-        string $name,
-        Model $record,
-        CommentFormLocation $formLocation,
-        CommentsPaginationLocation $paginationLocation,
-        CommentsPaginationType $paginationType,
-        int|string $paginationPerPage,
-        array $paginationOptions,
-        /**
-         * @param  class-string  $mentionProviders
-         */
-        array $mentionProviders,
-        /**
-         * @param  class-string  $formSchema
-         */
-        string $formSchema,
-        /**
-         * @param  class-string  $itemSchema
-         */
-        string $itemSchema,
-
-        string $commentItemContentFieldName,
-        /**
-         * @param  class-string  $commentItemComponent
-         */
-        string $commentItemComponent,
-
-        CommentFormat $commentFormat,
-        string $sortColumn,
-        string $saveAction,
-    ): void {
         $this->record = $record;
-        $this->name = $name;
-        $this->formLocation = $formLocation;
-        $this->paginationLocation = $paginationLocation;
-        $this->paginationType = $paginationType;
-        $this->paginationPerPage = $paginationPerPage;
-        $this->paginationOptions = $paginationOptions;
-        $this->mentionProviders = $mentionProviders;
-        $this->formSchema = $formSchema;
-        $this->itemSchema = $itemSchema;
-        $this->commentItemContentFieldName = $commentItemContentFieldName;
-        $this->commentItemComponent = $commentItemComponent;
-        $this->commentFormat = $commentFormat;
-        $this->sortColumn = $sortColumn;
-        $this->saveAction = $saveAction;
+        $this->settings = $settings;
+        $this->perPage = $settings->defaultPerPage;
 
-        // If a commentId is present in the query string, we want to set the pagination to the page where the comment is located and highlight the comment.
-        if ($this->commentId !== null && ($pageByCommentId = $this->getPageByCommentId()) !== null) {
-            $this->setPage(
-                $pageByCommentId,
-                $this->getPaginationPageName()
-            );
+        $this->ensureRelationshipExists();
 
-            $this->dispatch('highlight-comment', $this->commentId);
-        }
+        $this->openLinkedComment();
 
         $this->form->fill();
     }
 
-    #[Computed]
-    public function comments()
+    public function updatedPerPage(): void
     {
-        $comments = $this->record->{$this->name}();
+        $this->perPage = $this->getPerPage();
 
-        $comments = $comments->orderBy($this->sortColumn, 'desc');
+        $this->resetCommentsPage();
+    }
 
-        $comments = match ($this->paginationType) {
-            CommentsPaginationType::Simple => $comments->simplePaginate($this->paginationPerPage, pageName: $this->getPaginationPageName()),
-            CommentsPaginationType::Standard => $comments->paginate($this->paginationPerPage, pageName: $this->getPaginationPageName()),
-            CommentsPaginationType::Cursor => $comments->cursorPaginate($this->paginationPerPage, pageName: $this->getPaginationPageName()),
+    public function getPerPage(): int
+    {
+        return $this->settings->normalizePerPage($this->perPage);
+    }
+
+    /**
+     * @return HasOneOrMany<Model, Model, mixed>
+     */
+    public function getRelationship(): HasOneOrMany
+    {
+        return $this->record->{$this->settings->relationship}();
+    }
+
+    /**
+     * @return Paginator<int, Model>|CursorPaginator<int, Model>
+     */
+    public function getComments(): Paginator|CursorPaginator
+    {
+        $query = $this->getRelationship()
+            ->with('author')
+            ->orderBy($this->settings->sortColumn, 'desc')
+            ->orderBy($this->getRelationship()->getRelated()->getQualifiedKeyName(), 'desc');
+
+        $pageName = $this->settings->pageName();
+
+        return match ($this->settings->paginationType) {
+            CommentsPaginationType::Simple => $query->simplePaginate($this->getPerPage(), pageName: $pageName),
+            CommentsPaginationType::Standard => $query->paginate($this->getPerPage(), pageName: $pageName),
+            CommentsPaginationType::Cursor => $query->cursorPaginate($this->getPerPage(), cursorName: $pageName),
         };
-
-        return $comments;
     }
 
-    protected function getPaginationPageName(): string
+    /**
+     * @param  Paginator<int, Model>|CursorPaginator<int, Model>  $comments
+     * @return Collection<int, Model>
+     */
+    public function getItems(Paginator|CursorPaginator $comments): Collection
     {
-        return $this->name.'_page';
-    }
+        $items = collect($comments->items());
 
-    #[Computed]
-    public function commentsList()
-    {
-        $comments = $this->comments();
-
-        // If the form is located below the comments, we want to reverse the order of the comments to show the oldest comment first.
-        if ($this->formLocation === CommentFormLocation::Below) {
-            return $comments->reverse();
+        // With the form below the list reads like a conversation: the newest comment sits right above the form.
+        if ($this->settings->formLocation === CommentFormLocation::Below) {
+            return $items->reverse()->values();
         }
 
-        return $comments;
+        return $items;
     }
 
-    public function commentItem(Model $record): Schema
+    public function commentItem(Model $comment): Schema
     {
-        return $this->itemSchema::configure(Schema::make($this), $this->commentItemContentFieldName, $this->commentItemComponent, $this->commentFormat)
-            ->record($record);
+        return $this->settings->itemSchema::configure(Schema::make($this), $this->settings)
+            ->record($comment);
     }
 
-    public function form(): Schema
+    public function form(Schema $schema): Schema
     {
-        return $this->formSchema::configure(
-            Schema::make($this),
-            $this->mentionProviders,
-            $this->commentItemContentFieldName,
-            $this->commentFormat
-        )
+        return $this->settings->formSchema::configure($schema, $this->settings)
             ->statePath('data');
     }
 
-    #[On('quote-comment')]
-    public function quoteComment($commentId): void
+    public function quoteComment(string|int $commentId): void
     {
-        $comment = $this->record->{$this->name}()->whereKey($commentId)->first();
+        $comment = $this->getRelationship()->whereKey($commentId)->first();
 
         if ($comment === null) {
             return;
         }
 
-        $state = $this->form->getStateSnapshot();
+        $field = $this->settings->contentField;
+        $quoted = (string) $comment->getAttribute($field);
+        $current = (string) ($this->form->getStateSnapshot()[$field] ?? '');
 
-        $content = $state[$this->commentItemContentFieldName] ?? '';
+        $content = match ($this->settings->format) {
+            CommentFormat::Html => ($current === '<p></p>' ? '' : $current).'<blockquote>'.$quoted.'</blockquote><p></p>',
+            CommentFormat::Markdown => ($current === '' ? '' : rtrim($current)."\n\n").$this->quoteMarkdown($quoted),
+        };
 
-        if ($content === '<p></p>') {
-            $content = '';
-        }
-
-        $this->form->fill([
-            $this->commentItemContentFieldName => $content.'<blockquote>'.str_replace("\n", "\n> ", $comment->content).'</blockquote><p></p>',
-        ]);
-
+        $this->form->fill([$field => $content]);
     }
+
     public function submitComment(): void
     {
+        if (! $this->settings->canComment) {
+            return;
+        }
+
         $user = Auth::user();
 
         if ($user === null) {
@@ -256,7 +187,7 @@ class CommentsList extends LivewireComponent implements HasActions, HasForms
 
         $data = $this->form->getState();
 
-        if ($data[$this->commentItemContentFieldName] === null) {
+        if (blank($data[$this->settings->contentField] ?? null)) {
             Notification::make()
                 ->danger()
                 ->title(__('happenv-filament-comments::comments.empty_comment'))
@@ -265,35 +196,150 @@ class CommentsList extends LivewireComponent implements HasActions, HasForms
             return;
         }
 
-        resolve($this->saveAction)($this->record, $data, $user, $this->name, $this->commentItemContentFieldName);
+        app($this->settings->saveAction)($this->record, $data, $user, $this->settings);
 
         $this->form->fill();
 
-        $this->dispatch('comment-added');
-        $this->js('$wire.$refresh()');
-        $this->setPage(0, $this->getPaginationPageName());
+        $this->commentId = null;
+        $this->resetCommentsPage();
+
+        $this->dispatch('comment-added', relationship: $this->settings->relationship);
 
         Notification::make()
             ->success()
             ->title(__('happenv-filament-comments::comments.comment_added'))
             ->send();
-            
     }
 
     public function render(): View
     {
-        return view('happenv-filament-comments::livewire.comments-list');
+        $comments = $this->getComments();
+
+        return view($this->view, [
+            'comments' => $comments,
+            'items' => $this->getItems($comments),
+        ]);
     }
 
     /**
-     * @return array<string,array<string,string>>
+     * @return array<string, array<string, string>>
      */
     protected function queryString(): array
     {
         return [
             'commentId' => [
-                'as' => $this->name.'_comment_id',
+                'as' => $this->settings->commentIdParameter(),
             ],
         ];
+    }
+
+    protected function resetCommentsPage(): void
+    {
+        $this->setPage(
+            $this->settings->paginationType === CommentsPaginationType::Cursor ? '' : 1,
+            $this->settings->pageName(),
+        );
+    }
+
+    /**
+     * Makes sure the configured relationship is a real "has many" relationship before it is ever called, so a
+     * misconfigured name can not invoke an arbitrary method on the record.
+     */
+    protected function ensureRelationshipExists(): void
+    {
+        $name = $this->settings->relationship;
+
+        if ($this->record->relationResolver($this->record::class, $name) !== null) {
+            return;
+        }
+
+        if (! method_exists($this->record, $name)) {
+            throw new InvalidArgumentException(sprintf('The [%s] model has no [%s] comments relationship.', $this->record::class, $name));
+        }
+
+        $returnType = new ReflectionMethod($this->record, $name)->getReturnType();
+
+        if (! $returnType instanceof ReflectionNamedType || ! is_a($returnType->getName(), HasOneOrMany::class, true)) {
+            throw new InvalidArgumentException(sprintf(
+                'The [%s::%s()] method must declare a [%s] return type (e.g. MorphMany) to be used as a comments relationship.',
+                $this->record::class,
+                $name,
+                HasOneOrMany::class,
+            ));
+        }
+    }
+
+    /**
+     * When the query string points to a comment, opens the page containing it and asks the browser to highlight it.
+     */
+    protected function openLinkedComment(): void
+    {
+        if (blank($this->commentId)) {
+            return;
+        }
+
+        $target = $this->getRelationship()->whereKey($this->commentId)->first();
+
+        if ($target === null) {
+            $this->commentId = null;
+
+            return;
+        }
+
+        $this->setPage($this->getPageOf($target), $this->settings->pageName());
+
+        $this->dispatch('highlight-comment', commentId: $target->getKey(), relationship: $this->settings->relationship);
+    }
+
+    /**
+     * Page number (or encoded cursor) of the page that contains the given comment.
+     */
+    protected function getPageOf(Model $target): int|string
+    {
+        $sortColumn = $this->settings->sortColumn;
+        $keyName = $target->getKeyName();
+
+        $newer = fn (Relation $query): Relation => $query->where(fn ($query) => $query
+            ->where($sortColumn, '>', $target->getAttribute($sortColumn))
+            ->orWhere(fn ($query) => $query
+                ->where($sortColumn, $target->getAttribute($sortColumn))
+                ->where($target->qualifyColumn($keyName), '>', $target->getKey())));
+
+        $position = $newer($this->getRelationship())->count();
+
+        if ($this->settings->paginationType !== CommentsPaginationType::Cursor) {
+            return intdiv($position, $this->getPerPage()) + 1;
+        }
+
+        $offset = $position - ($position % $this->getPerPage());
+
+        if ($offset === 0) {
+            return '';
+        }
+
+        // The cursor of a page is the last comment of the previous page.
+        $previous = $newer($this->getRelationship())
+            ->orderBy($sortColumn)
+            ->orderBy($target->qualifyColumn($keyName))
+            ->skip($position - $offset)
+            ->first();
+
+        if ($previous === null) {
+            return '';
+        }
+
+        return new Cursor([
+            $sortColumn => $previous->getAttribute($sortColumn) instanceof \DateTimeInterface
+                ? $previous->getRawOriginal($sortColumn)
+                : $previous->getAttribute($sortColumn),
+            $target->qualifyColumn($keyName) => $previous->getKey(),
+        ])->encode();
+    }
+
+    protected function quoteMarkdown(string $content): string
+    {
+        $lines = preg_split('/\R/', trim($content)) ?: [];
+
+        return implode("\n", array_map(fn (string $line): string => '> '.$line, $lines))."\n\n";
     }
 }

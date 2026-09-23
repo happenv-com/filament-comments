@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     'add_comment_placeholder' => 'Napisz komentarz...',
     'submit' => 'Wyślij',
@@ -12,4 +14,11 @@ return [
     'delete' => 'Usuń',
     'confirm_delete' => 'Czy na pewno chcesz usunąć ten komentarz?',
     'comments_title' => 'Komentarze',
+    'author' => 'Autor',
+    'quote' => 'Cytuj',
+    'quote_tooltip' => 'Zacytuj ten komentarz',
+    'share' => 'Udostępnij',
+    'copy_link' => 'Skopiuj link do komentarza',
+    'copied' => 'Link skopiowany',
+    'copy_failed' => 'Nie udało się skopiować linku',
 ];

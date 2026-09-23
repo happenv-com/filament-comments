@@ -5,28 +5,27 @@ declare(strict_types=1);
 namespace Happenv\FilamentComments\Models;
 
 use Carbon\CarbonInterface;
-use Filament\Facades\Filament;
 use Filament\Forms\Components\RichEditor\Models\Concerns\InteractsWithRichContent;
 use Filament\Forms\Components\RichEditor\Models\Contracts\HasRichContent;
 use Happenv\FilamentComments\Database\Factories\CommentFactory;
 use Happenv\FilamentComments\Filament\MentionProviders\UserMentionProvider;
+use Happenv\FilamentComments\Support\AuthorModel;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 /**
- * @property string $id
+ * @property int|string $id
  * @property string $commentable_type
  * @property string $commentable_id
- * @property string $author_id
+ * @property int|string $author_id
  * @property string $content
  * @property CarbonInterface $created_at
  * @property CarbonInterface $updated_at
- * @property CarbonInterface|null $deleted_at
  * @property-read Authenticatable $author
  * @property-read Model $commentable
  */
@@ -40,13 +39,12 @@ class Comment extends Model implements HasRichContent
 
     use InteractsWithRichContent;
 
-    // @phpstan-ignore missingType.generics, missingType.generics
+    /**
+     * @return BelongsTo<Model, $this>
+     */
     public function author(): BelongsTo
     {
-        $userModel = Auth::guard(Filament::getAuthGuard())->user()->getModel();
-
-        // @phpstan-ignore argument.type, argument.templateType
-        return $this->belongsTo($userModel, 'author_id');
+        return $this->belongsTo(AuthorModel::resolve(), 'author_id');
     }
 
     /**
@@ -66,16 +64,36 @@ class Comment extends Model implements HasRichContent
 
     public function setUpRichContent(): void
     {
-        if (method_exists($this->commentable()->getModel(), 'setUpCommentsRichContent')) {
-            $decorator = $this->commentable()->getModel()->setUpCommentsRichContent($this);
+        $attribute = $this->registerRichContent('content');
 
-            $decorator($this->registerRichContent('content'));
+        $commentable = $this->getCommentableClass();
+
+        if ($commentable !== null && method_exists($commentable, 'setUpCommentsRichContent')) {
+            $decorator = app($commentable)->setUpCommentsRichContent($this);
+
+            $decorator($attribute);
 
             return;
         }
 
-        $this->registerRichContent('content')->mentions([
+        $attribute->mentions([
             UserMentionProvider::make(),
         ]);
+    }
+
+    /**
+     * @return class-string<Model>|null
+     */
+    protected function getCommentableClass(): ?string
+    {
+        $type = $this->getAttribute('commentable_type');
+
+        if (! is_string($type) || $type === '') {
+            return null;
+        }
+
+        $class = Relation::getMorphedModel($type) ?? $type;
+
+        return is_a($class, Model::class, true) ? $class : null;
     }
 }

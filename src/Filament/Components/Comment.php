@@ -14,53 +14,71 @@ use Filament\Schemas\Components\Section;
 use Filament\Support\Icons\Heroicon;
 use Happenv\FilamentComments\Livewire\CommentsList;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Js;
 use Override;
 
+/**
+ * Renders a single comment. Every part (header, author, date, content, footer) can be replaced with another
+ * component, a closure returning one, or `false` to remove it.
+ */
 class Comment extends Component
 {
     #[Override]
+    // @phpstan-ignore property.defaultValue
     protected string $view = 'filament-schemas::components.grid';
 
-    protected Component|null|false $authorComponent = null;
+    protected Component|Closure|false|null $authorComponent = null;
 
-    protected Component|null|false $headerComponent = null;
+    protected Component|Closure|false|null $headerComponent = null;
 
-    protected Component|null|false $contentComponent = null;
+    protected Component|Closure|false|null $contentComponent = null;
 
-    protected Component|null|false $footerComponent = null;
+    protected Component|Closure|false|null $footerComponent = null;
 
-    protected Component|null|false $createdAtComponent = null;
+    protected Component|Closure|false|null $createdAtComponent = null;
 
-    protected bool $markdown = true;
+    protected bool|Closure $markdown = false;
 
-    public function __construct(public string $name = 'comment')
+    /**
+     * @param  string  $name  Name of the attribute that holds the comment content.
+     */
+    final public function __construct(protected string $name = 'content') {}
+
+    public static function make(string $name = 'content'): static
     {
-        $this->configure();
-
-        $this->schema($this->commentSchema());
-    }
-
-    public static function make(string $name = 'comment'): static
-    {
-        $static = resolve(static::class, [
+        $static = app(static::class, [
             'name' => $name,
         ]);
+
+        $static->configure();
 
         return $static;
     }
 
+    #[Override]
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // Resolved lazily, so the parts reflect configuration done after `make()`.
+        $this->schema(fn (): array => $this->commentSchema());
+    }
+
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
     /**
-     * @return Component[]
+     * @return list<Component>
      */
     public function commentSchema(): array
     {
-        $components = [
+        $components = array_values(array_filter([
             $this->getHeaderComponent(),
             $this->getContentComponent(),
             $this->getFooterComponent(),
-        ];
-
-        $components = array_filter($components);
+        ]));
 
         if ($components === []) {
             return [];
@@ -72,26 +90,26 @@ class Comment extends Component
         ];
     }
 
-    public function headerComponent(Component|null|false $component = null): static
+    public function headerComponent(Component|Closure|false|null $component = null): static
     {
         $this->headerComponent = $component;
 
         return $this;
     }
 
-    public function getHeaderComponent(): Component|null|false
+    public function getHeaderComponent(): Component|false|null
     {
         return $this->headerComponent !== null
-        ? $this->evaluate($this->headerComponent)
-        : $this->getDefaultHeaderComponent();
+            ? $this->evaluate($this->headerComponent)
+            : $this->getDefaultHeaderComponent();
     }
 
-    public function getDefaultHeaderComponent(): Component|null|false
+    public function getDefaultHeaderComponent(): Component|false|null
     {
-        $components = array_filter([
+        $components = array_values(array_filter([
             $this->getAuthorComponent(),
             $this->getCreatedAtComponent(),
-        ]);
+        ]));
 
         if ($components === []) {
             return null;
@@ -101,43 +119,44 @@ class Comment extends Component
             ->schema($components);
     }
 
-    public function authorComponent(Component|null|false $component = null): static
+    public function authorComponent(Component|Closure|false|null $component = null): static
     {
         $this->authorComponent = $component;
 
         return $this;
     }
 
-    public function getAuthorComponent(): Component|null|false
+    public function getAuthorComponent(): Component|false|null
     {
         return $this->authorComponent !== null
-        ? $this->evaluate($this->authorComponent)
-        : $this->getDefaultAuthorComponent();
+            ? $this->evaluate($this->authorComponent)
+            : $this->getDefaultAuthorComponent();
     }
 
-    public function getDefaultAuthorComponent(): Component|null|false
+    public function getDefaultAuthorComponent(): Component|false|null
     {
         return TextEntry::make('author.name')
-            ->label('Created By')
+            ->label(__('happenv-filament-comments::comments.author'))
             ->hiddenLabel()
+            ->placeholder(__('happenv-filament-comments::comments.unknown_user'))
             ->columnSpan(1);
     }
 
-    public function createdAtComponent(Component|null|false $component = null): static
+    public function createdAtComponent(Component|Closure|false|null $component = null): static
     {
         $this->createdAtComponent = $component;
 
         return $this;
     }
 
-    public function getCreatedAtComponent(): Component|null|false
+    public function getCreatedAtComponent(): Component|false|null
     {
         return $this->createdAtComponent !== null
-        ? $this->evaluate($this->createdAtComponent)
-        : $this->getDefaultCreatedAtComponent();
+            ? $this->evaluate($this->createdAtComponent)
+            : $this->getDefaultCreatedAtComponent();
     }
 
-    public function getDefaultCreatedAtComponent(): Component|null|false
+    public function getDefaultCreatedAtComponent(): Component|false|null
     {
         return TextEntry::make('created_at')
             ->hiddenLabel()
@@ -148,103 +167,106 @@ class Comment extends Component
             ->alignEnd();
     }
 
-    public function footerComponent(Component|null|false $component = null): static
+    public function footerComponent(Component|Closure|false|null $component = null): static
     {
         $this->footerComponent = $component;
 
         return $this;
     }
 
-    public function getFooterComponent(): Component|null|false
+    public function getFooterComponent(): Component|false|null
     {
         return $this->footerComponent !== null
-        ? $this->evaluate($this->footerComponent)
-        : $this->getDefaultFooterComponent();
+            ? $this->evaluate($this->footerComponent)
+            : $this->getDefaultFooterComponent();
     }
 
-    public function getDefaultFooterComponent(): Component|null|false
+    public function getDefaultFooterComponent(): Component|false|null
     {
         return Grid::make(2)
             ->schema([
                 Actions::make([
-                    Action::make('quote')
-                        ->label(__('happenv-filament-comments::comments.quote'))
-                        ->iconButton()
-                        ->tooltip(__('happenv-filament-comments::comments.quote_tooltip'))
-                        ->icon(Heroicon::ChatBubbleBottomCenterText)
-                        ->actionJs(function (Model $record, CommentsList $livewire): string {
-                            $formId = 'comment-form-'.$livewire->name;
-
-                            return <<<"SCRIPT"
-                                \$wire.dispatch('quote-comment', { commentId: '{$record->id}' });
-                                const formElement = document.getElementById('{$formId}');
-                                if (formElement) {
-                                    formElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                }
-                            SCRIPT;
-                        }),
-
-                    Action::make('share')
-                        ->label(__('happenv-filament-comments::comments.share'))
-                        ->iconButton()
-                        ->tooltip(__('happenv-filament-comments::comments.copy_link'))
-                        ->icon(Heroicon::Link)
-                        ->actionJs(function (Model $record, CommentsList $livewire): string {
-                            $paramName = $livewire->name.'_comment_id';
-
-                            $copyMessage = __('filament-forms::components.text_input.actions.copy.message');
-
-                            return <<<"SCRIPT"
-                            navigator.clipboard.writeText(window.location.origin + window.location.pathname + '?{$paramName}={$record->id}')
-                                .then(() => {
-                                \$tooltip('{$copyMessage}', {
-                                    theme: \$store.theme,
-                                    timeout: 1000,
-                                })
-
-                                })
-                                .catch((error) => {
-                                    console.error('Error copying comment URL:', error);
-                                    alert('Failed to copy comment URL.');
-                                });
-                            SCRIPT;
-                        }),
+                    $this->getQuoteAction(),
+                    $this->getShareAction(),
                 ])->alignStart(),
-
             ]);
     }
 
-    public function getDefaultContentComponent(): Component|null|false
+    public function getQuoteAction(): Action
     {
-        $component = TextEntry::make($this->name)
+        return Action::make('quote')
+            ->label(__('happenv-filament-comments::comments.quote'))
+            ->iconButton()
+            ->tooltip(__('happenv-filament-comments::comments.quote_tooltip'))
+            ->icon(Heroicon::ChatBubbleBottomCenterText)
+            ->visible(fn (CommentsList $livewire): bool => $livewire->settings->canComment)
+            ->actionJs(function (Model $record, CommentsList $livewire): string {
+                $commentId = Js::from($record->getKey());
+                $formId = Js::from('comment-form-'.$livewire->settings->relationship);
+
+                return <<<JS
+                    \$wire.quoteComment({$commentId});
+                    document.getElementById({$formId})?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    JS;
+            });
+    }
+
+    public function getShareAction(): Action
+    {
+        return Action::make('share')
+            ->label(__('happenv-filament-comments::comments.share'))
+            ->iconButton()
+            ->tooltip(__('happenv-filament-comments::comments.copy_link'))
+            ->icon(Heroicon::Link)
+            ->actionJs(function (Model $record, CommentsList $livewire): string {
+                $parameter = Js::from($livewire->settings->commentIdParameter());
+                $commentId = Js::from((string) $record->getKey());
+                $copiedMessage = Js::from(__('happenv-filament-comments::comments.copied'));
+                $failedMessage = Js::from(__('happenv-filament-comments::comments.copy_failed'));
+
+                return <<<JS
+                    const url = new URL(window.location.href);
+                    url.search = new URLSearchParams({ [{$parameter}]: {$commentId} }).toString();
+                    url.hash = '';
+                    navigator.clipboard.writeText(url.toString())
+                        .then(() => \$tooltip({$copiedMessage}, { theme: \$store.theme, timeout: 1000 }))
+                        .catch(() => \$tooltip({$failedMessage}, { theme: \$store.theme, timeout: 2000 }));
+                    JS;
+            });
+    }
+
+    public function getDefaultContentComponent(): Component|false|null
+    {
+        $component = TextEntry::make($this->getName())
             ->hiddenLabel();
 
         if ($this->isMarkdown()) {
-            $component = $component
-                ->markdown()
-                ->nl2br();
-        } else {
-            $component = $component->prose();
+            // Read the raw attribute, so a model registering it as rich content does not bypass the markdown parser.
+            return $component
+                ->state(fn (Model $record): mixed => $record->getAttribute($this->getName()))
+                ->markdown();
         }
 
-        return $component;
+        return $component
+            ->html()
+            ->prose();
     }
 
-    public function contentComponent(Component|null|false $component = null): static
+    public function contentComponent(Component|Closure|false|null $component = null): static
     {
         $this->contentComponent = $component;
 
         return $this;
     }
 
-    public function getContentComponent(): Component|null|false
+    public function getContentComponent(): Component|false|null
     {
         return $this->contentComponent !== null
-        ? $this->evaluate($this->contentComponent)
-        : $this->getDefaultContentComponent();
+            ? $this->evaluate($this->contentComponent)
+            : $this->getDefaultContentComponent();
     }
 
-    public function markdown(bool|Closure $condition = true): self
+    public function markdown(bool|Closure $condition = true): static
     {
         $this->markdown = $condition;
 
@@ -253,6 +275,6 @@ class Comment extends Component
 
     public function isMarkdown(): bool
     {
-        return $this->evaluate($this->markdown);
+        return (bool) $this->evaluate($this->markdown);
     }
 }

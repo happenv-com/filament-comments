@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Happenv\FilamentComments\Filament\MentionProviders;
 
-use Filament\Facades\Filament;
 use Filament\Forms\Components\RichEditor\MentionProvider;
+use Happenv\FilamentComments\Contracts\ProvidesMentions;
+use Happenv\FilamentComments\Support\AuthorModel;
 
-final class UserMentionProvider
+final class UserMentionProvider implements ProvidesMentions
 {
     public static function make(string $char = '@'): MentionProvider
     {
@@ -16,7 +17,7 @@ final class UserMentionProvider
 
     public function provide(string $char = '@'): MentionProvider
     {
-        $userModel = Filament::getCurrentPanel()->auth()->user()->getModel();
+        $userModel = AuthorModel::resolve();
 
         return MentionProvider::make($char)
             ->getSearchResultsUsing(fn (string $search): array => $userModel::query()

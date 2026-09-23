@@ -8,6 +8,10 @@ use Closure;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Livewire;
 use Happenv\FilamentComments\Actions\SaveCommentAction;
+use Happenv\FilamentComments\Contracts\ConfiguresCommentForm;
+use Happenv\FilamentComments\Contracts\ConfiguresCommentItem;
+use Happenv\FilamentComments\Contracts\ProvidesMentions;
+use Happenv\FilamentComments\Contracts\SavesComment;
 use Happenv\FilamentComments\Enums\CommentFormat;
 use Happenv\FilamentComments\Enums\CommentFormLocation;
 use Happenv\FilamentComments\Enums\CommentsPaginationLocation;
@@ -15,16 +19,17 @@ use Happenv\FilamentComments\Enums\CommentsPaginationType;
 use Happenv\FilamentComments\Filament\Schemas\CommentFormSchema;
 use Happenv\FilamentComments\Filament\Schemas\CommentItemSchema;
 use Happenv\FilamentComments\Livewire\CommentsList;
-use Illuminate\Database\Eloquent\Model;
+use Happenv\FilamentComments\Support\CommentsSettings;
 use Override;
 
+/**
+ * Schema component that renders a paginated comments list for the current record.
+ *
+ * Every setting accepts a value or a closure returning it. Closures are evaluated once, when the list is mounted,
+ * with the usual Filament injections (`$record`, `$livewire`, ...) of the host schema.
+ */
 class Comments extends Component
 {
-    /**
-     * @var class-string[]
-     */
-    protected array $mentionProviders = [];
-
     /**
      * @var view-string
      */
@@ -32,38 +37,60 @@ class Comments extends Component
     // @phpstan-ignore property.defaultValue
     protected string $view = 'happenv-filament-comments::filament.components.comments';
 
-    protected CommentFormLocation $formLocation = CommentFormLocation::Above;
+    /**
+     * @var array<class-string<ProvidesMentions>|Closure>
+     */
+    protected array $mentionProviders = [];
 
-    protected CommentsPaginationLocation $paginationLocation = CommentsPaginationLocation::Below;
+    protected CommentFormLocation|Closure $formLocation = CommentFormLocation::Above;
 
-    protected int $paginationDefaultPerPage = 20;
+    protected CommentsPaginationLocation|Closure $paginationLocation = CommentsPaginationLocation::Below;
+
+    protected int|Closure $paginationDefaultPerPage = 20;
 
     /**
-     * @var int[]
+     * @var list<int>|Closure
      */
-    protected array $paginationOptions = [10, 20, 50];
+    protected array|Closure $paginationOptions = [10, 20, 50];
 
-    protected CommentsPaginationType $paginationType = CommentsPaginationType::Simple;
+    protected CommentsPaginationType|Closure $paginationType = CommentsPaginationType::Simple;
 
-    protected string $formSchema = CommentFormSchema::class;
+    /**
+     * @var class-string<ConfiguresCommentForm>|Closure
+     */
+    protected string|Closure $formSchema = CommentFormSchema::class;
 
-    protected string $itemSchema = CommentItemSchema::class;
+    /**
+     * @var class-string<ConfiguresCommentItem>|Closure
+     */
+    protected string|Closure $itemSchema = CommentItemSchema::class;
 
-    protected string $commentContentFieldName = 'content';
+    protected string|Closure $commentContentFieldName = 'content';
 
-    protected string $commentItemComponent = Comment::class;
+    /**
+     * @var class-string<Comment>|Closure
+     */
+    protected string|Closure $commentItemComponent = Comment::class;
 
-    protected CommentFormat $commentFormat = CommentFormat::Html;
+    protected CommentFormat|Closure $commentFormat = CommentFormat::Html;
 
-    protected string $sortColumn = 'created_at';
+    protected string|Closure $sortColumn = 'created_at';
 
+    /**
+     * @var class-string<SavesComment>|Closure
+     */
     protected string|Closure $saveAction = SaveCommentAction::class;
 
-    public function __construct(protected string $name) {}
+    protected bool|Closure $canComment = true;
 
+    final public function __construct(protected string $name) {}
+
+    /**
+     * @param  string  $name  Name of the comments relationship on the record.
+     */
     public static function make(string $name = 'comments'): static
     {
-        $static = resolve(static::class, [
+        $static = app(static::class, [
             'name' => $name,
         ]);
 
@@ -72,16 +99,52 @@ class Comments extends Component
         return $static;
     }
 
+    #[Override]
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->configureSchema();
+        $this->key("comments-{$this->name}");
+
+        $this->schema([
+            Livewire::make(CommentsList::class, fn (): array => [
+                'settings' => $this->toSettings(),
+            ])
+                ->key('comments-list')
+                ->columnSpanFull(),
+        ]);
     }
 
-    public function getPaginationType(): CommentsPaginationType
+    #[Override]
+    public function isHidden(): bool
     {
-        return $this->evaluate($this->paginationType);
+        return $this->getRecord() === null || parent::isHidden();
+    }
+
+    public function toSettings(): CommentsSettings
+    {
+        return new CommentsSettings(
+            relationship: $this->getName(),
+            formLocation: $this->getFormLocation(),
+            paginationLocation: $this->getPaginationLocation(),
+            paginationType: $this->getPaginationType(),
+            defaultPerPage: $this->getPaginationDefaultPerPage(),
+            perPageOptions: $this->getPaginationOptions(),
+            mentionProviders: $this->getMentionProviders(),
+            formSchema: $this->getFormSchema(),
+            itemSchema: $this->getItemSchema(),
+            contentField: $this->getCommentItemContentFieldName(),
+            itemComponent: $this->getCommentItemComponent(),
+            format: $this->getCommentFormat(),
+            sortColumn: $this->getSortColumn(),
+            saveAction: $this->getSaveAction(),
+            canComment: $this->isCommentingEnabled(),
+        );
+    }
+
+    public function getName(): string
+    {
+        return $this->name;
     }
 
     public function paginationType(CommentsPaginationType|Closure $type): static
@@ -91,9 +154,9 @@ class Comments extends Component
         return $this;
     }
 
-    public function getPaginationDefaultPerPage(): int
+    public function getPaginationType(): CommentsPaginationType
     {
-        return $this->evaluate($this->paginationDefaultPerPage);
+        return $this->evaluate($this->paginationType);
     }
 
     public function paginationDefaultPerPage(int|Closure $perPage): static
@@ -103,16 +166,13 @@ class Comments extends Component
         return $this;
     }
 
-    /**
-     * @return int[]
-     */
-    public function getPaginationOptions(): array
+    public function getPaginationDefaultPerPage(): int
     {
-        return $this->evaluate($this->paginationOptions);
+        return $this->evaluate($this->paginationDefaultPerPage);
     }
 
     /**
-     * @param  int[]|Closure  $options
+     * @param  list<int>|Closure  $options
      */
     public function paginationOptions(array|Closure $options): static
     {
@@ -121,16 +181,12 @@ class Comments extends Component
         return $this;
     }
 
-    public function getFormLocation(): CommentFormLocation
+    /**
+     * @return list<int>
+     */
+    public function getPaginationOptions(): array
     {
-        return $this->evaluate($this->formLocation);
-    }
-
-    public function formLocation(CommentFormLocation|Closure $location): static
-    {
-        $this->formLocation = $location;
-
-        return $this;
+        return array_values($this->evaluate($this->paginationOptions));
     }
 
     public function paginationLocation(CommentsPaginationLocation|Closure $location = CommentsPaginationLocation::Below): static
@@ -145,13 +201,20 @@ class Comments extends Component
         return $this->evaluate($this->paginationLocation);
     }
 
-    public function getName(): string
+    public function formLocation(CommentFormLocation|Closure $location): static
     {
-        return $this->name;
+        $this->formLocation = $location;
+
+        return $this;
+    }
+
+    public function getFormLocation(): CommentFormLocation
+    {
+        return $this->evaluate($this->formLocation);
     }
 
     /**
-     * @param  class-string|Closure  $provider
+     * @param  class-string<ProvidesMentions>|Closure  $provider
      */
     public function mentionProvider(string|Closure $provider): static
     {
@@ -161,7 +224,7 @@ class Comments extends Component
     }
 
     /**
-     * @param  array<class-string|Closure>  $providers
+     * @param  array<class-string<ProvidesMentions>|Closure>  $providers
      */
     public function mentionProviders(array $providers): static
     {
@@ -173,20 +236,16 @@ class Comments extends Component
     }
 
     /**
-     * @return class-string[]
+     * @return list<class-string<ProvidesMentions>>
      */
     public function getMentionProviders(): array
     {
-        return array_map(fn (string $provider): mixed => $this->evaluate($provider), $this->mentionProviders);
+        return array_values(array_map(fn (string|Closure $provider): mixed => $this->evaluate($provider), $this->mentionProviders));
     }
 
-    public function itemSchema(string|Closure $schema): static
-    {
-        $this->itemSchema = $schema;
-
-        return $this;
-    }
-
+    /**
+     * @param  class-string<ConfiguresCommentForm>|Closure  $schema
+     */
     public function formSchema(string|Closure $schema): static
     {
         $this->formSchema = $schema;
@@ -194,14 +253,30 @@ class Comments extends Component
         return $this;
     }
 
-    public function getItemSchema(): string
-    {
-        return $this->evaluate($this->itemSchema);
-    }
-
+    /**
+     * @return class-string<ConfiguresCommentForm>
+     */
     public function getFormSchema(): string
     {
         return $this->evaluate($this->formSchema);
+    }
+
+    /**
+     * @param  class-string<ConfiguresCommentItem>|Closure  $schema
+     */
+    public function itemSchema(string|Closure $schema): static
+    {
+        $this->itemSchema = $schema;
+
+        return $this;
+    }
+
+    /**
+     * @return class-string<ConfiguresCommentItem>
+     */
+    public function getItemSchema(): string
+    {
+        return $this->evaluate($this->itemSchema);
     }
 
     public function commentItemContentFieldName(string|Closure $fieldName): static
@@ -213,9 +288,12 @@ class Comments extends Component
 
     public function getCommentItemContentFieldName(): string
     {
-        return $this->evaluate($this->commentContentFieldName) ?? 'content';
+        return $this->evaluate($this->commentContentFieldName);
     }
 
+    /**
+     * @param  class-string<Comment>|Closure  $component
+     */
     public function commentItemComponent(string|Closure $component): static
     {
         $this->commentItemComponent = $component;
@@ -223,6 +301,9 @@ class Comments extends Component
         return $this;
     }
 
+    /**
+     * @return class-string<Comment>
+     */
     public function getCommentItemComponent(): string
     {
         return $this->evaluate($this->commentItemComponent);
@@ -243,14 +324,18 @@ class Comments extends Component
     public function sortColumn(string|Closure $column): static
     {
         $this->sortColumn = $column;
+
         return $this;
     }
 
     public function getSortColumn(): string
     {
-        return $this->evaluate($this->sortColumn) ?? 'created_at';
+        return $this->evaluate($this->sortColumn);
     }
 
+    /**
+     * @param  class-string<SavesComment>|Closure  $action  Class name of the action, or a closure returning it.
+     */
     public function saveAction(string|Closure $action): static
     {
         $this->saveAction = $action;
@@ -258,34 +343,23 @@ class Comments extends Component
         return $this;
     }
 
-    public function getSaveAction(): ?string
+    /**
+     * @return class-string<SavesComment>
+     */
+    public function getSaveAction(): string
     {
         return $this->evaluate($this->saveAction);
     }
 
-    public function configureSchema(): static
+    public function canComment(bool|Closure $condition = true): static
     {
-
-        $this->schema([
-            Livewire::make(CommentsList::class, fn (Model $record): array => [
-                'record' => $record,
-                'name' => $this->getName(),
-                'formLocation' => $this->getFormLocation(),
-                'paginationLocation' => $this->getPaginationLocation(),
-                'paginationType' => $this->getPaginationType(),
-                'paginationPerPage' => $this->getPaginationDefaultPerPage(),
-                'paginationOptions' => $this->getPaginationOptions(),
-                'mentionProviders' => $this->getMentionProviders(),
-                'formSchema' => $this->getFormSchema(),
-                'itemSchema' => $this->getItemSchema(),
-                'commentItemContentFieldName' => $this->getCommentItemContentFieldName(),
-                'commentItemComponent' => $this->getCommentItemComponent(),
-                'commentFormat' => $this->getCommentFormat(),
-                'sortColumn' => $this->getSortColumn(),
-                'saveAction' => $this->getSaveAction(),
-            ])->columnSpanFull(),
-        ]);
+        $this->canComment = $condition;
 
         return $this;
+    }
+
+    public function isCommentingEnabled(): bool
+    {
+        return (bool) $this->evaluate($this->canComment);
     }
 }

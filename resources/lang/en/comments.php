@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     'add_comment_placeholder' => 'Write a comment...',
     'submit' => 'Submit',
@@ -12,4 +14,11 @@ return [
     'delete' => 'Delete',
     'confirm_delete' => 'Are you sure you want to delete this comment?',
     'comments_title' => 'Comments',
+    'author' => 'Author',
+    'quote' => 'Quote',
+    'quote_tooltip' => 'Quote this comment',
+    'share' => 'Share',
+    'copy_link' => 'Copy link to this comment',
+    'copied' => 'Link copied',
+    'copy_failed' => 'Could not copy the link',
 ];

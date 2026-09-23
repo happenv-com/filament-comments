@@ -7,30 +7,26 @@ namespace Happenv\FilamentComments\Filament\Schemas;
 use Filament\Actions\Action;
 use Filament\Forms\Components\MarkdownEditor;
 use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\RichEditor\MentionProvider;
 use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Happenv\FilamentComments\Contracts\ConfiguresCommentForm;
 use Happenv\FilamentComments\Enums\CommentFormat;
-use InvalidArgumentException;
+use Happenv\FilamentComments\Support\CommentsSettings;
 
-final class CommentFormSchema
+class CommentFormSchema implements ConfiguresCommentForm
 {
-    /**
-     * @param  class-string[]  $mentionProviders
-     *
-     * @throws InvalidArgumentException
-     */
-    public static function configure(
-        Schema $schema,
-        array $mentionProviders = [],
-        string $commentContentFieldName = 'content',
-        CommentFormat $commentFormat = CommentFormat::Html): Schema
+    public static function configure(Schema $schema, CommentsSettings $settings): Schema
     {
-        $mentions = array_map(static fn (string $provider) => resolve($provider)::make(), $mentionProviders);
+        $mentions = array_map(
+            static fn (string $provider): MentionProvider => $provider::make(),
+            $settings->mentionProviders,
+        );
 
-        $input = match ($commentFormat) {
-            CommentFormat::Html => self::htmlFormatInput($commentContentFieldName, $mentions),
-            CommentFormat::Markdown => self::markdownFormatInput($commentContentFieldName, $mentions),
+        $input = match ($settings->format) {
+            CommentFormat::Html => static::htmlFormatInput($settings->contentField, $mentions),
+            CommentFormat::Markdown => static::markdownFormatInput($settings->contentField),
         };
 
         return $schema
@@ -45,10 +41,14 @@ final class CommentFormSchema
             ]);
     }
 
-    public static function htmlFormatInput(string $commentContentFieldName, array $mentions): RichEditor
+    /**
+     * @param  list<MentionProvider>  $mentions
+     */
+    public static function htmlFormatInput(string $contentField, array $mentions): RichEditor
     {
-        return RichEditor::make($commentContentFieldName)
+        return RichEditor::make($contentField)
             ->hiddenLabel()
+            ->placeholder(__('happenv-filament-comments::comments.add_comment_placeholder'))
             ->toolbarButtons([
                 'bold',
                 'italic',
@@ -63,12 +63,11 @@ final class CommentFormSchema
             ->mentions($mentions);
     }
 
-    public static function markdownFormatInput(string $commentContentFieldName, array $mentions): MarkdownEditor
+    public static function markdownFormatInput(string $contentField): MarkdownEditor
     {
-        return MarkdownEditor::make($commentContentFieldName)
+        return MarkdownEditor::make($contentField)
             ->hiddenLabel()
+            ->placeholder(__('happenv-filament-comments::comments.add_comment_placeholder'))
             ->required();
-        // ->mentions($mentions)
-        // ->markdown();
     }
 }

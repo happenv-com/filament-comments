@@ -17,16 +17,19 @@ class FilamentCommentsServiceProvider extends PackageServiceProvider
     public function configurePackage(Package $package): void
     {
         $package->name('happenv-filament-comments')
+            ->hasConfigFile('filament-comments')
             ->hasViews()
             ->hasTranslations()
             ->discoversMigrations();
     }
 
+    #[Override]
     public function packageRegistered(): void
     {
         $this->app->bindIf(Comment::class, Comment::class);
     }
 
+    #[Override]
     public function packageBooted(): void
     {
         Livewire::component('happenv-filament-comments-list', CommentsList::class);

@@ -29,16 +29,13 @@
         "larastan/larastan": "^3.0",
         "laravel/pint": "^1.0",
         "nunomaduro/collision": "^8.0",
-        "orchestra/testbench": "^9.0|^10.0",
-        "pestphp/pest": "^4.0",
-        "pestphp/pest-plugin-laravel": "^4.0",
-        "pestphp/pest-plugin-livewire": "^4.0",
+        "orchestra/testbench": "^10.0|^11.0",
+        "pestphp/pest": "^5.0",
         "phpstan/extension-installer": "^1.1",
         "phpstan/phpstan": "^2.1",
         "phpstan/phpstan-deprecation-rules": "^2.0",
         "phpstan/phpstan-phpunit": "^2.0",
-        "rector/rector": "^2.0",
-        "spatie/laravel-ray": "^1.26"
+        "rector/rector": "^2.0"
     },
     "autoload": {
         "psr-4": {
@@ -64,10 +61,10 @@
         "laravel": {
             "providers": [
                 "Happenv\\FilamentComments\\FilamentCommentsServiceProvider"
-            ],
-            "aliases": {
-                "Comments": "Happenv\\FilamentComments\\Facades\\Comments"
-            }
+            ]
+        },
+        "branch-alias": {
+            "dev-2.x": "2.x-dev"
         }
     },
     "config": {
