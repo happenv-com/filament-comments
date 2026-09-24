@@ -15,7 +15,7 @@ class UserFactory extends Factory
     protected $model = User::class;
 
     /**
-     * @return array<string, mixed>
+     * @return array<model-property<User>, mixed>
      */
     public function definition(): array
     {

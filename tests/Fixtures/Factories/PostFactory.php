@@ -15,7 +15,7 @@ class PostFactory extends Factory
     protected $model = Post::class;
 
     /**
-     * @return array<string, mixed>
+     * @return array<model-property<Post>, mixed>
      */
     public function definition(): array
     {
