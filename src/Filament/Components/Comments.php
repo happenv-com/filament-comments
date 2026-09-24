@@ -33,7 +33,6 @@ class Comments extends Component
     /**
      * @var view-string
      */
-    #[Override]
     // @phpstan-ignore property.defaultValue
     protected string $view = 'happenv-filament-comments::filament.components.comments';
 

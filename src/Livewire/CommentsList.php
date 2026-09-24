@@ -257,7 +257,7 @@ class CommentsList extends LivewireComponent implements HasActions, HasForms
             throw new InvalidArgumentException(sprintf('The [%s] model has no [%s] comments relationship.', $this->record::class, $name));
         }
 
-        $returnType = new ReflectionMethod($this->record, $name)->getReturnType();
+        $returnType = (new ReflectionMethod($this->record, $name))->getReturnType();
 
         if (! $returnType instanceof ReflectionNamedType || ! is_a($returnType->getName(), HasOneOrMany::class, true)) {
             throw new InvalidArgumentException(sprintf(
@@ -328,12 +328,12 @@ class CommentsList extends LivewireComponent implements HasActions, HasForms
             return '';
         }
 
-        return new Cursor([
+        return (new Cursor([
             $sortColumn => $previous->getAttribute($sortColumn) instanceof \DateTimeInterface
                 ? $previous->getRawOriginal($sortColumn)
                 : $previous->getAttribute($sortColumn),
             $target->qualifyColumn($keyName) => $previous->getKey(),
-        ])->encode();
+        ]))->encode();
     }
 
     protected function quoteMarkdown(string $content): string

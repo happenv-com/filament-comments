@@ -8,14 +8,12 @@ use Happenv\FilamentComments\Models\Comment;
 use Happenv\FilamentComments\Support\AuthorModel;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Override;
 
 /**
  * @extends Factory<Comment>
  */
 class CommentFactory extends Factory
 {
-    #[Override]
     protected $model = Comment::class;
 
     /**

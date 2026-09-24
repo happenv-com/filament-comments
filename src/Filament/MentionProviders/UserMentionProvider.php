@@ -12,7 +12,7 @@ final class UserMentionProvider implements ProvidesMentions
 {
     public static function make(string $char = '@'): MentionProvider
     {
-        return new self()->provide($char);
+        return (new self)->provide($char);
     }
 
     public function provide(string $char = '@'): MentionProvider

@@ -23,7 +23,6 @@ use Override;
  */
 class Comment extends Component
 {
-    #[Override]
     // @phpstan-ignore property.defaultValue
     protected string $view = 'filament-schemas::components.grid';
 
