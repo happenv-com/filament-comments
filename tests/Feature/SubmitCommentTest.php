@@ -18,7 +18,7 @@ class PrefixingSaveCommentAction implements SavesComment
     public function __invoke(Model $record, array $data, Authenticatable $author, CommentsSettings $settings): Model
     {
         return $record->{$settings->relationship}()->forceCreate([
-            $settings->contentField => '[custom] '.$data[$settings->contentField],
+            $settings->contentField => '[custom] ' . $data[$settings->contentField],
             'author_id' => $author->getAuthIdentifier(),
         ]);
     }

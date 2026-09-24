@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Happenv\FilamentComments\Filament\Components\Comments;
 use Happenv\FilamentComments\Tests\Fixtures\Models\Post;
+use Illuminate\Support\Facades\Artisan;
 use Livewire\Features\SupportLockedProperties\CannotUpdateLockedPropertyException;
 
 beforeEach(function (): void {
@@ -14,7 +15,7 @@ it('does not let the browser change the settings', function (string $property, m
     commentsList($this->post)->set($property, $value);
 })->with([
     'relationship' => ['settings.relationship', 'delete'],
-    'save action' => ['settings.saveAction', 'Illuminate\\Support\\Facades\\Artisan'],
+    'save action' => ['settings.saveAction', Artisan::class],
     'form schema' => ['settings.formSchema', 'App\\Evil'],
     'item schema' => ['settings.itemSchema', 'App\\Evil'],
     'item component' => ['settings.itemComponent', 'App\\Evil'],

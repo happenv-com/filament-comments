@@ -41,46 +41,46 @@ class Comments extends Component
      */
     protected array $mentionProviders = [];
 
-    protected CommentFormLocation|Closure $formLocation = CommentFormLocation::Above;
+    protected CommentFormLocation | Closure $formLocation = CommentFormLocation::Above;
 
-    protected CommentsPaginationLocation|Closure $paginationLocation = CommentsPaginationLocation::Below;
+    protected CommentsPaginationLocation | Closure $paginationLocation = CommentsPaginationLocation::Below;
 
-    protected int|Closure $paginationDefaultPerPage = 20;
+    protected int | Closure $paginationDefaultPerPage = 20;
 
     /**
      * @var list<int>|Closure
      */
-    protected array|Closure $paginationOptions = [10, 20, 50];
+    protected array | Closure $paginationOptions = [10, 20, 50];
 
-    protected CommentsPaginationType|Closure $paginationType = CommentsPaginationType::Simple;
+    protected CommentsPaginationType | Closure $paginationType = CommentsPaginationType::Simple;
 
     /**
      * @var class-string<ConfiguresCommentForm>|Closure
      */
-    protected string|Closure $formSchema = CommentFormSchema::class;
+    protected string | Closure $formSchema = CommentFormSchema::class;
 
     /**
      * @var class-string<ConfiguresCommentItem>|Closure
      */
-    protected string|Closure $itemSchema = CommentItemSchema::class;
+    protected string | Closure $itemSchema = CommentItemSchema::class;
 
-    protected string|Closure $commentContentFieldName = 'content';
+    protected string | Closure $commentContentFieldName = 'content';
 
     /**
      * @var class-string<Comment>|Closure
      */
-    protected string|Closure $commentItemComponent = Comment::class;
+    protected string | Closure $commentItemComponent = Comment::class;
 
-    protected CommentFormat|Closure $commentFormat = CommentFormat::Html;
+    protected CommentFormat | Closure $commentFormat = CommentFormat::Html;
 
-    protected string|Closure $sortColumn = 'created_at';
+    protected string | Closure $sortColumn = 'created_at';
 
     /**
      * @var class-string<SavesComment>|Closure
      */
-    protected string|Closure $saveAction = SaveCommentAction::class;
+    protected string | Closure $saveAction = SaveCommentAction::class;
 
-    protected bool|Closure $canComment = true;
+    protected bool | Closure $canComment = true;
 
     final public function __construct(protected string $name) {}
 
@@ -146,7 +146,7 @@ class Comments extends Component
         return $this->name;
     }
 
-    public function paginationType(CommentsPaginationType|Closure $type): static
+    public function paginationType(CommentsPaginationType | Closure $type): static
     {
         $this->paginationType = $type;
 
@@ -158,7 +158,7 @@ class Comments extends Component
         return $this->evaluate($this->paginationType);
     }
 
-    public function paginationDefaultPerPage(int|Closure $perPage): static
+    public function paginationDefaultPerPage(int | Closure $perPage): static
     {
         $this->paginationDefaultPerPage = $perPage;
 
@@ -173,7 +173,7 @@ class Comments extends Component
     /**
      * @param  list<int>|Closure  $options
      */
-    public function paginationOptions(array|Closure $options): static
+    public function paginationOptions(array | Closure $options): static
     {
         $this->paginationOptions = $options;
 
@@ -188,7 +188,7 @@ class Comments extends Component
         return array_values($this->evaluate($this->paginationOptions));
     }
 
-    public function paginationLocation(CommentsPaginationLocation|Closure $location = CommentsPaginationLocation::Below): static
+    public function paginationLocation(CommentsPaginationLocation | Closure $location = CommentsPaginationLocation::Below): static
     {
         $this->paginationLocation = $location;
 
@@ -200,7 +200,7 @@ class Comments extends Component
         return $this->evaluate($this->paginationLocation);
     }
 
-    public function formLocation(CommentFormLocation|Closure $location): static
+    public function formLocation(CommentFormLocation | Closure $location): static
     {
         $this->formLocation = $location;
 
@@ -215,7 +215,7 @@ class Comments extends Component
     /**
      * @param  class-string<ProvidesMentions>|Closure  $provider
      */
-    public function mentionProvider(string|Closure $provider): static
+    public function mentionProvider(string | Closure $provider): static
     {
         $this->mentionProviders[] = $provider;
 
@@ -239,13 +239,13 @@ class Comments extends Component
      */
     public function getMentionProviders(): array
     {
-        return array_values(array_map(fn (string|Closure $provider): mixed => $this->evaluate($provider), $this->mentionProviders));
+        return array_values(array_map(fn (string | Closure $provider): mixed => $this->evaluate($provider), $this->mentionProviders));
     }
 
     /**
      * @param  class-string<ConfiguresCommentForm>|Closure  $schema
      */
-    public function formSchema(string|Closure $schema): static
+    public function formSchema(string | Closure $schema): static
     {
         $this->formSchema = $schema;
 
@@ -263,7 +263,7 @@ class Comments extends Component
     /**
      * @param  class-string<ConfiguresCommentItem>|Closure  $schema
      */
-    public function itemSchema(string|Closure $schema): static
+    public function itemSchema(string | Closure $schema): static
     {
         $this->itemSchema = $schema;
 
@@ -278,7 +278,7 @@ class Comments extends Component
         return $this->evaluate($this->itemSchema);
     }
 
-    public function commentItemContentFieldName(string|Closure $fieldName): static
+    public function commentItemContentFieldName(string | Closure $fieldName): static
     {
         $this->commentContentFieldName = $fieldName;
 
@@ -293,7 +293,7 @@ class Comments extends Component
     /**
      * @param  class-string<Comment>|Closure  $component
      */
-    public function commentItemComponent(string|Closure $component): static
+    public function commentItemComponent(string | Closure $component): static
     {
         $this->commentItemComponent = $component;
 
@@ -308,7 +308,7 @@ class Comments extends Component
         return $this->evaluate($this->commentItemComponent);
     }
 
-    public function commentFormat(CommentFormat|Closure $format): static
+    public function commentFormat(CommentFormat | Closure $format): static
     {
         $this->commentFormat = $format;
 
@@ -320,7 +320,7 @@ class Comments extends Component
         return $this->evaluate($this->commentFormat);
     }
 
-    public function sortColumn(string|Closure $column): static
+    public function sortColumn(string | Closure $column): static
     {
         $this->sortColumn = $column;
 
@@ -335,7 +335,7 @@ class Comments extends Component
     /**
      * @param  class-string<SavesComment>|Closure  $action  Class name of the action, or a closure returning it.
      */
-    public function saveAction(string|Closure $action): static
+    public function saveAction(string | Closure $action): static
     {
         $this->saveAction = $action;
 
@@ -350,7 +350,7 @@ class Comments extends Component
         return $this->evaluate($this->saveAction);
     }
 
-    public function canComment(bool|Closure $condition = true): static
+    public function canComment(bool | Closure $condition = true): static
     {
         $this->canComment = $condition;
 

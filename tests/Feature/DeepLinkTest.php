@@ -15,7 +15,7 @@ beforeEach(function (): void {
     $this->post = Post::factory()->create();
 });
 
-function deepLink(Post $post, Comment|string $comment, Comments $comments): Testable
+function deepLink(Post $post, Comment | string $comment, Comments $comments): Testable
 {
     $id = $comment instanceof Comment ? $comment->getKey() : $comment;
 
