@@ -121,7 +121,7 @@ it('renders the pagination where it was asked for', function (CommentsPagination
 
     $html = commentsList($this->post, Comments::make()->paginationLocation($location))->html();
 
-    expect(substr_count($html, 'aria-label="'.__('filament::components/pagination.label').'"'))->toBe($expectedPaginations)
+    expect(substr_count($html, 'aria-label="' . __('filament::components/pagination.label') . '"'))->toBe($expectedPaginations)
         ->and(substr_count($html, 'wire:model.live="tableRecordsPerPage"'))->toBe(0);
 
     if ($expectedPaginations > 0) {

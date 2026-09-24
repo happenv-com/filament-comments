@@ -61,12 +61,12 @@ class CommentsList extends LivewireComponent implements HasActions, HasForms
     /**
      * Page size picked by the user. Always read through `getPerPage()`, which clamps it to the allowed options.
      */
-    public int|string|null $perPage = null;
+    public int | string | null $perPage = null;
 
     /**
      * Comment to open and highlight, taken from the query string.
      */
-    public string|int|null $commentId = null;
+    public string | int | null $commentId = null;
 
     public function mount(Model $record, CommentsSettings $settings): void
     {
@@ -104,7 +104,7 @@ class CommentsList extends LivewireComponent implements HasActions, HasForms
     /**
      * @return Paginator<int, Model>|CursorPaginator<int, Model>
      */
-    public function getComments(): Paginator|CursorPaginator
+    public function getComments(): Paginator | CursorPaginator
     {
         $query = $this->getRelationship()
             ->with('author')
@@ -124,7 +124,7 @@ class CommentsList extends LivewireComponent implements HasActions, HasForms
      * @param  Paginator<int, Model>|CursorPaginator<int, Model>  $comments
      * @return Collection<int, Model>
      */
-    public function getItems(Paginator|CursorPaginator $comments): Collection
+    public function getItems(Paginator | CursorPaginator $comments): Collection
     {
         $items = collect($comments->items());
 
@@ -148,7 +148,7 @@ class CommentsList extends LivewireComponent implements HasActions, HasForms
             ->statePath('data');
     }
 
-    public function quoteComment(string|int $commentId): void
+    public function quoteComment(string | int $commentId): void
     {
         $comment = $this->getRelationship()->whereKey($commentId)->first();
 
@@ -161,8 +161,8 @@ class CommentsList extends LivewireComponent implements HasActions, HasForms
         $current = (string) ($this->form->getStateSnapshot()[$field] ?? '');
 
         $content = match ($this->settings->format) {
-            CommentFormat::Html => ($current === '<p></p>' ? '' : $current).'<blockquote>'.$quoted.'</blockquote><p></p>',
-            CommentFormat::Markdown => ($current === '' ? '' : rtrim($current)."\n\n").$this->quoteMarkdown($quoted),
+            CommentFormat::Html => ($current === '<p></p>' ? '' : $current) . '<blockquote>' . $quoted . '</blockquote><p></p>',
+            CommentFormat::Markdown => ($current === '' ? '' : rtrim($current) . "\n\n") . $this->quoteMarkdown($quoted),
         };
 
         $this->form->fill([$field => $content]);
@@ -257,7 +257,7 @@ class CommentsList extends LivewireComponent implements HasActions, HasForms
             throw new InvalidArgumentException(sprintf('The [%s] model has no [%s] comments relationship.', $this->record::class, $name));
         }
 
-        $returnType = new ReflectionMethod($this->record, $name)->getReturnType();
+        $returnType = (new ReflectionMethod($this->record, $name))->getReturnType();
 
         if (! $returnType instanceof ReflectionNamedType || ! is_a($returnType->getName(), HasOneOrMany::class, true)) {
             throw new InvalidArgumentException(sprintf(
@@ -294,7 +294,7 @@ class CommentsList extends LivewireComponent implements HasActions, HasForms
     /**
      * Page number (or encoded cursor) of the page that contains the given comment.
      */
-    protected function getPageOf(Model $target): int|string
+    protected function getPageOf(Model $target): int | string
     {
         $sortColumn = $this->settings->sortColumn;
         $keyName = $target->getKeyName();
@@ -328,18 +328,18 @@ class CommentsList extends LivewireComponent implements HasActions, HasForms
             return '';
         }
 
-        return new Cursor([
+        return (new Cursor([
             $sortColumn => $previous->getAttribute($sortColumn) instanceof \DateTimeInterface
                 ? $previous->getRawOriginal($sortColumn)
                 : $previous->getAttribute($sortColumn),
             $target->qualifyColumn($keyName) => $previous->getKey(),
-        ])->encode();
+        ]))->encode();
     }
 
     protected function quoteMarkdown(string $content): string
     {
         $lines = preg_split('/\R/', trim($content)) ?: [];
 
-        return implode("\n", array_map(fn (string $line): string => '> '.$line, $lines))."\n\n";
+        return implode("\n", array_map(fn (string $line): string => '> ' . $line, $lines)) . "\n\n";
     }
 }

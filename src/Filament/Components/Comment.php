@@ -23,21 +23,20 @@ use Override;
  */
 class Comment extends Component
 {
-    #[Override]
     // @phpstan-ignore property.defaultValue
     protected string $view = 'filament-schemas::components.grid';
 
-    protected Component|Closure|false|null $authorComponent = null;
+    protected Component | Closure | false | null $authorComponent = null;
 
-    protected Component|Closure|false|null $headerComponent = null;
+    protected Component | Closure | false | null $headerComponent = null;
 
-    protected Component|Closure|false|null $contentComponent = null;
+    protected Component | Closure | false | null $contentComponent = null;
 
-    protected Component|Closure|false|null $footerComponent = null;
+    protected Component | Closure | false | null $footerComponent = null;
 
-    protected Component|Closure|false|null $createdAtComponent = null;
+    protected Component | Closure | false | null $createdAtComponent = null;
 
-    protected bool|Closure $markdown = false;
+    protected bool | Closure $markdown = false;
 
     /**
      * @param  string  $name  Name of the attribute that holds the comment content.
@@ -90,21 +89,21 @@ class Comment extends Component
         ];
     }
 
-    public function headerComponent(Component|Closure|false|null $component = null): static
+    public function headerComponent(Component | Closure | false | null $component = null): static
     {
         $this->headerComponent = $component;
 
         return $this;
     }
 
-    public function getHeaderComponent(): Component|false|null
+    public function getHeaderComponent(): Component | false | null
     {
         return $this->headerComponent !== null
             ? $this->evaluate($this->headerComponent)
             : $this->getDefaultHeaderComponent();
     }
 
-    public function getDefaultHeaderComponent(): Component|false|null
+    public function getDefaultHeaderComponent(): Component | false | null
     {
         $components = array_values(array_filter([
             $this->getAuthorComponent(),
@@ -119,21 +118,21 @@ class Comment extends Component
             ->schema($components);
     }
 
-    public function authorComponent(Component|Closure|false|null $component = null): static
+    public function authorComponent(Component | Closure | false | null $component = null): static
     {
         $this->authorComponent = $component;
 
         return $this;
     }
 
-    public function getAuthorComponent(): Component|false|null
+    public function getAuthorComponent(): Component | false | null
     {
         return $this->authorComponent !== null
             ? $this->evaluate($this->authorComponent)
             : $this->getDefaultAuthorComponent();
     }
 
-    public function getDefaultAuthorComponent(): Component|false|null
+    public function getDefaultAuthorComponent(): Component | false | null
     {
         return TextEntry::make('author.name')
             ->label(__('happenv-filament-comments::comments.author'))
@@ -142,21 +141,21 @@ class Comment extends Component
             ->columnSpan(1);
     }
 
-    public function createdAtComponent(Component|Closure|false|null $component = null): static
+    public function createdAtComponent(Component | Closure | false | null $component = null): static
     {
         $this->createdAtComponent = $component;
 
         return $this;
     }
 
-    public function getCreatedAtComponent(): Component|false|null
+    public function getCreatedAtComponent(): Component | false | null
     {
         return $this->createdAtComponent !== null
             ? $this->evaluate($this->createdAtComponent)
             : $this->getDefaultCreatedAtComponent();
     }
 
-    public function getDefaultCreatedAtComponent(): Component|false|null
+    public function getDefaultCreatedAtComponent(): Component | false | null
     {
         return TextEntry::make('created_at')
             ->hiddenLabel()
@@ -167,21 +166,21 @@ class Comment extends Component
             ->alignEnd();
     }
 
-    public function footerComponent(Component|Closure|false|null $component = null): static
+    public function footerComponent(Component | Closure | false | null $component = null): static
     {
         $this->footerComponent = $component;
 
         return $this;
     }
 
-    public function getFooterComponent(): Component|false|null
+    public function getFooterComponent(): Component | false | null
     {
         return $this->footerComponent !== null
             ? $this->evaluate($this->footerComponent)
             : $this->getDefaultFooterComponent();
     }
 
-    public function getDefaultFooterComponent(): Component|false|null
+    public function getDefaultFooterComponent(): Component | false | null
     {
         return Grid::make(2)
             ->schema([
@@ -202,7 +201,7 @@ class Comment extends Component
             ->visible(fn (CommentsList $livewire): bool => $livewire->settings->canComment)
             ->actionJs(function (Model $record, CommentsList $livewire): string {
                 $commentId = Js::from($record->getKey());
-                $formId = Js::from('comment-form-'.$livewire->settings->relationship);
+                $formId = Js::from('comment-form-' . $livewire->settings->relationship);
 
                 return <<<JS
                     \$wire.quoteComment({$commentId});
@@ -235,7 +234,7 @@ class Comment extends Component
             });
     }
 
-    public function getDefaultContentComponent(): Component|false|null
+    public function getDefaultContentComponent(): Component | false | null
     {
         $component = TextEntry::make($this->getName())
             ->hiddenLabel();
@@ -252,21 +251,21 @@ class Comment extends Component
             ->prose();
     }
 
-    public function contentComponent(Component|Closure|false|null $component = null): static
+    public function contentComponent(Component | Closure | false | null $component = null): static
     {
         $this->contentComponent = $component;
 
         return $this;
     }
 
-    public function getContentComponent(): Component|false|null
+    public function getContentComponent(): Component | false | null
     {
         return $this->contentComponent !== null
             ? $this->evaluate($this->contentComponent)
             : $this->getDefaultContentComponent();
     }
 
-    public function markdown(bool|Closure $condition = true): static
+    public function markdown(bool | Closure $condition = true): static
     {
         $this->markdown = $condition;
 

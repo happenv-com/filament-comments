@@ -3,26 +3,12 @@
 declare(strict_types=1);
 
 use Filament\Notifications\Notification;
-use Happenv\FilamentComments\Contracts\SavesComment;
 use Happenv\FilamentComments\Enums\CommentsPaginationType;
 use Happenv\FilamentComments\Filament\Components\Comments;
 use Happenv\FilamentComments\Models\Comment;
-use Happenv\FilamentComments\Support\CommentsSettings;
+use Happenv\FilamentComments\Tests\Fixtures\Actions\PrefixingSaveCommentAction;
 use Happenv\FilamentComments\Tests\Fixtures\Models\Post;
 use Happenv\FilamentComments\Tests\Fixtures\Models\User;
-use Illuminate\Contracts\Auth\Authenticatable;
-use Illuminate\Database\Eloquent\Model;
-
-class PrefixingSaveCommentAction implements SavesComment
-{
-    public function __invoke(Model $record, array $data, Authenticatable $author, CommentsSettings $settings): Model
-    {
-        return $record->{$settings->relationship}()->forceCreate([
-            $settings->contentField => '[custom] '.$data[$settings->contentField],
-            'author_id' => $author->getAuthIdentifier(),
-        ]);
-    }
-}
 
 beforeEach(function (): void {
     $this->post = Post::factory()->create();

@@ -2,21 +2,12 @@
 
 declare(strict_types=1);
 
-use Filament\Infolists\Components\TextEntry;
 use Happenv\FilamentComments\Enums\CommentFormat;
-use Happenv\FilamentComments\Filament\Components\Comment as CommentComponent;
 use Happenv\FilamentComments\Filament\Components\Comments;
 use Happenv\FilamentComments\Models\Comment;
+use Happenv\FilamentComments\Tests\Fixtures\Components\CustomCommentComponent;
 use Happenv\FilamentComments\Tests\Fixtures\Models\Post;
 use Happenv\FilamentComments\Tests\Fixtures\Models\User;
-
-class CustomCommentComponent extends CommentComponent
-{
-    public function getDefaultContentComponent(): TextEntry
-    {
-        return TextEntry::make($this->getName())->hiddenLabel()->prefix('CUSTOM:');
-    }
-}
 
 beforeEach(function (): void {
     $this->post = Post::factory()->create();
@@ -64,7 +55,7 @@ it('shows the author name', function (): void {
 it('renders each comment with an anchor for deep links', function (): void {
     $comment = Comment::factory()->for($this->post, 'commentable')->withAuthor($this->author)->create();
 
-    commentsList($this->post)->assertSeeHtml('id="comment-comments-'.$comment->getKey().'"');
+    commentsList($this->post)->assertSeeHtml('id="comment-comments-' . $comment->getKey() . '"');
 });
 
 it('uses a custom comment component', function (): void {
@@ -84,7 +75,7 @@ it('safely embeds the translated copy message in the share action', function ():
 });
 
 it('does not leave debug output in the view', function (): void {
-    $view = file_get_contents(__DIR__.'/../../resources/views/livewire/comments-list.blade.php');
+    $view = file_get_contents(__DIR__ . '/../../resources/views/livewire/comments-list.blade.php');
 
     expect($view)->not->toContain('console.log');
 });

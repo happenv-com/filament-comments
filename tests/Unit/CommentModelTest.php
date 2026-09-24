@@ -4,28 +4,10 @@ declare(strict_types=1);
 
 use Filament\Forms\Components\RichEditor\RichContentAttribute;
 use Happenv\FilamentComments\Models\Comment;
+use Happenv\FilamentComments\Tests\Fixtures\Models\AlternativeAuthor;
 use Happenv\FilamentComments\Tests\Fixtures\Models\Post;
+use Happenv\FilamentComments\Tests\Fixtures\Models\PostWithCustomRichContent;
 use Happenv\FilamentComments\Tests\Fixtures\Models\User;
-use Illuminate\Foundation\Auth\User as BaseUser;
-
-class AlternativeAuthor extends BaseUser
-{
-    protected $table = 'users';
-}
-
-class PostWithCustomRichContent extends Post
-{
-    protected $table = 'posts';
-
-    public static int $calls = 0;
-
-    public function setUpCommentsRichContent(Comment $comment): Closure
-    {
-        self::$calls++;
-
-        return fn (RichContentAttribute $attribute): RichContentAttribute => $attribute;
-    }
-}
 
 it('resolves the author without anybody being logged in', function (): void {
     $author = User::factory()->create();

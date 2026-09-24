@@ -14,6 +14,9 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 // @phpstan-ignore trait.unused
 trait HasComments
 {
+    /**
+     * @return MorphMany<Comment, $this>
+     */
     public function comments(): MorphMany
     {
         return $this->morphMany(resolve(Comment::class)::class, 'commentable');

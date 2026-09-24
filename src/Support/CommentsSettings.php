@@ -51,19 +51,19 @@ final readonly class CommentsSettings implements Wireable
         public string $saveAction,
         public bool $canComment,
     ) {
-        self::assertIdentifier('relationship', $relationship);
-        self::assertIdentifier('content field', $contentField);
-        self::assertIdentifier('sort column', $sortColumn);
+        $this->assertIdentifier('relationship', $relationship);
+        $this->assertIdentifier('content field', $contentField);
+        $this->assertIdentifier('sort column', $sortColumn);
 
-        self::assertPagination($perPageOptions, $defaultPerPage);
+        $this->assertPagination($perPageOptions, $defaultPerPage);
 
-        self::assertImplements('save action', $saveAction, SavesComment::class);
-        self::assertImplements('form schema', $formSchema, ConfiguresCommentForm::class);
-        self::assertImplements('item schema', $itemSchema, ConfiguresCommentItem::class);
-        self::assertImplements('item component', $itemComponent, Comment::class);
+        $this->assertImplements('save action', $saveAction, SavesComment::class);
+        $this->assertImplements('form schema', $formSchema, ConfiguresCommentForm::class);
+        $this->assertImplements('item schema', $itemSchema, ConfiguresCommentItem::class);
+        $this->assertImplements('item component', $itemComponent, Comment::class);
 
         foreach ($mentionProviders as $mentionProvider) {
-            self::assertImplements('mention provider', $mentionProvider, ProvidesMentions::class);
+            $this->assertImplements('mention provider', $mentionProvider, ProvidesMentions::class);
         }
     }
 
@@ -79,12 +79,12 @@ final readonly class CommentsSettings implements Wireable
 
     public function pageName(): string
     {
-        return $this->relationship.'_page';
+        return $this->relationship . '_page';
     }
 
     public function commentIdParameter(): string
     {
-        return $this->relationship.'_comment_id';
+        return $this->relationship . '_comment_id';
     }
 
     /**
@@ -143,7 +143,7 @@ final readonly class CommentsSettings implements Wireable
         );
     }
 
-    private static function assertIdentifier(string $label, string $value): void
+    private function assertIdentifier(string $label, string $value): void
     {
         if (preg_match(self::IDENTIFIER_PATTERN, $value) !== 1) {
             throw new InvalidArgumentException(sprintf('The comments %s [%s] is not a valid identifier.', $label, $value));
@@ -153,7 +153,7 @@ final readonly class CommentsSettings implements Wireable
     /**
      * @param  array<mixed>  $options
      */
-    private static function assertPagination(array $options, int $default): void
+    private function assertPagination(array $options, int $default): void
     {
         if ($options === []) {
             throw new InvalidArgumentException('The comments pagination needs at least one page size option.');
@@ -174,7 +174,7 @@ final readonly class CommentsSettings implements Wireable
         }
     }
 
-    private static function assertImplements(string $label, mixed $class, string $contract): void
+    private function assertImplements(string $label, mixed $class, string $contract): void
     {
         if (! is_string($class) || ! class_exists($class) || ! is_a($class, $contract, true)) {
             throw new InvalidArgumentException(sprintf(
