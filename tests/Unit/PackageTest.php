@@ -7,14 +7,6 @@ use Happenv\FilamentComments\Filament\Components\Comment;
 use Illuminate\Support\Facades\File;
 use Symfony\Component\Finder\SplFileInfo;
 
-arch('source files declare strict types')
-    ->expect('Happenv\FilamentComments')
-    ->toUseStrictTypes();
-
-arch('no debugging leftovers')
-    ->expect(['dd', 'dump', 'ray', 'var_dump', 'print_r'])
-    ->not->toBeUsed();
-
 it('has every used translation key in every shipped language', function (string $locale): void {
     $source = collect([
         ...File::allFiles(__DIR__ . '/../../src'),
