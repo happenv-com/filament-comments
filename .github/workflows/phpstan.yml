@@ -49,7 +49,7 @@ jobs:
       matrix:
         include:
           - filament: '4'
-            filament-constraint: '^4.3.1'
+            filament-constraint: '^4.5.0'
           - filament: '5'
             filament-constraint: '^5.0'
 

@@ -9,9 +9,11 @@ name: 'Tests'
 #
 # Filament 4 and 5 are both supported: each major gets its own
 # `filament-constraint` (composer.json's own floor, so prefer-lowest proves it)
-# and a Pest pin. Composer's security-advisory blocking refuses most older
-# Filament releases, so today the lowest legs resolve Filament 4.12.6 and
-# 5.7.6. tests/TestCase.php registers Livewire AFTER
+# and a Pest pin. Filament 4 needs 4.5.0: RichEditor::mentions() and
+# Action::actionJs() arrived there. Composer's security-advisory blocking
+# refuses most older Filament releases, so today the lowest legs resolve
+# Filament 4.12.6 and 5.7.6; the exact floors (4.5.0, 5.0.0) were verified
+# locally with blocking turned off. tests/TestCase.php registers Livewire AFTER
 # Filament, as package discovery does in an app; the other order breaks every
 # Livewire render on Filament before 4.13.3 / 5.8.3 (filamentphp/filament#20515).
 #
@@ -73,7 +75,7 @@ jobs:
           # Filament 4 runs on Livewire 3, and pest-plugin-livewire 5 needs
           # Livewire 4, so Filament 4 stays on Pest 4.
           - filament: '4'
-            filament-constraint: '^4.3.1'
+            filament-constraint: '^4.5.0'
             pest: '^4.0'
           # Pest 5 needs PHP 8.4, so Composer picks Pest 4 on PHP 8.3.
           - filament: '5'
