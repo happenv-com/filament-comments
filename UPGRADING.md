@@ -1,4 +1,6 @@
-# Upgrade guide
+# Upgrading
+
+Every major version gets a section here: what breaks, and what to change in an application to upgrade. Newest first.
 
 ## From 1.x to 2.x
 
