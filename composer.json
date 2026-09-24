@@ -1,42 +1,58 @@
 {
     "name": "happenv-com/filament-comments",
     "description": "Comments module for Filament",
+    "license": "MIT",
+    "type": "library",
     "keywords": [
-        "filament",
+        "happenv",
         "laravel",
         "filamentphp",
-        "comments"
+        "filament",
+        "filament-plugin",
+        "comments",
+        "filament-comments"
     ],
-    "homepage": "https://happenv.com",
-    "support": {
-        "issues": "https://github.com/happenv-com/filament-comments/issues",
-        "source": "https://github.com/happenv-com/filament-comments"
-    },
-    "license": "MIT",
     "authors": [
         {
-            "name": "Bartlomiej Gajda",
-            "email": "b.gajda@happenv.com",
+            "name": "Happenv sp. z o.o.",
+            "email": "code@happenv.com",
+            "homepage": "https://happenv.com",
+            "role": "Maintainer"
+        },
+        {
+            "name": "webard",
+            "email": "code@webard.me",
+            "homepage": "https://github.com/webard",
             "role": "Developer"
         }
     ],
+    "homepage": "https://github.com/happenv-com/filament-comments",
+    "support": {
+        "issues": "https://github.com/happenv-com/filament-comments/issues",
+        "source": "https://github.com/happenv-com/filament-comments",
+        "security": "https://github.com/happenv-com/filament-comments/security/policy"
+    },
     "require": {
         "php": "^8.3",
-        "filament/filament": "^4.3.1|^5.0",
+        "filament/filament": "^4.3.1 || ^5.0",
         "spatie/laravel-package-tools": "^1.15.0"
     },
     "require-dev": {
+        "driftingly/rector-laravel": "^2.1",
+        "ergebnis/composer-normalize": "^2.48",
         "larastan/larastan": "^3.0",
-        "laravel/pint": "^1.0",
+        "laravel/pint": "^1.24",
         "nunomaduro/collision": "^8.0",
-        "orchestra/testbench": "^10.0|^11.0",
-        "pestphp/pest": "^5.0",
-        "phpstan/extension-installer": "^1.1",
-        "phpstan/phpstan": "^2.1",
+        "orchestra/testbench": "^10.0 || ^11.0",
+        "pestphp/pest": "^4.0 || ^5.0",
+        "pestphp/pest-plugin-arch": "^4.0 || ^5.0",
+        "pestphp/pest-plugin-laravel": "^4.0 || ^5.0",
+        "pestphp/pest-plugin-livewire": "^4.0 || ^5.0",
         "phpstan/phpstan-deprecation-rules": "^2.0",
-        "phpstan/phpstan-phpunit": "^2.0",
-        "rector/rector": "^2.0"
+        "rector/rector": "^2.1"
     },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
     "autoload": {
         "psr-4": {
             "Happenv\\FilamentComments\\": "src/",
@@ -48,33 +64,59 @@
             "Happenv\\FilamentComments\\Tests\\": "tests/"
         }
     },
-    "scripts": {
-        "post-autoload-dump": "@php ./vendor/bin/testbench package:discover --ansi",
-        "analyse": "phpstan analyse",
-        "lint": "pint",
-        "refactor": "rector",
-        "test": "pest",
-        "test:lint": "pint --test",
-        "test:refactor": "rector --dry-run"
+    "config": {
+        "allow-plugins": {
+            "ergebnis/composer-normalize": true,
+            "pestphp/pest-plugin": true,
+            "phpstan/extension-installer": true
+        },
+        "sort-packages": true
     },
     "extra": {
+        "branch-alias": {
+            "dev-2.x": "2.x-dev"
+        },
         "laravel": {
             "providers": [
                 "Happenv\\FilamentComments\\FilamentCommentsServiceProvider"
             ]
-        },
-        "branch-alias": {
-            "dev-2.x": "2.x-dev"
         }
     },
-    "config": {
-        "sort-packages": true,
-        "allow-plugins": {
-            "composer/package-versions-deprecated": true,
-            "pestphp/pest-plugin": true,
-            "phpstan/extension-installer": true
-        }
+    "scripts": {
+        "post-autoload-dump": "@php ./vendor/bin/testbench package:discover --ansi",
+        "ci": [
+            "@normalize-composer-test",
+            "@rector-test",
+            "@pint-test",
+            "@phpstan",
+            "@test"
+        ],
+        "cs": [
+            "@normalize-composer",
+            "@rector",
+            "@pint"
+        ],
+        "normalize-composer": "@composer normalize --ansi",
+        "normalize-composer-test": "@composer normalize --dry-run --ansi",
+        "phpstan": "phpstan analyse --ansi",
+        "pint": "pint",
+        "pint-test": "pint --test",
+        "rector": "rector process",
+        "rector-test": "rector process --dry-run",
+        "test": "pest --testsuite=Unit,Feature",
+        "test-coverage": "pest --testsuite=Unit,Feature --coverage"
     },
-    "minimum-stability": "dev",
-    "prefer-stable": true
+    "scripts-descriptions": {
+        "ci": "Runs every CI gate locally: composer.json normalization, Rector, Pint, PHPStan and the test suite.",
+        "cs": "Fixes code style: composer normalize, Rector, then Pint (Rector adds imports, Pint sorts them).",
+        "normalize-composer": "Normalizes composer.json.",
+        "normalize-composer-test": "Checks composer.json is normalized.",
+        "phpstan": "Runs PHPStan.",
+        "pint": "Formats the code with Pint.",
+        "pint-test": "Checks the code style with Pint.",
+        "rector": "Applies Rector refactorings.",
+        "rector-test": "Shows pending Rector refactorings.",
+        "test": "Runs the unit and feature tests.",
+        "test-coverage": "Runs the unit and feature tests with code coverage (needs pcov or Xdebug)."
+    }
 }
