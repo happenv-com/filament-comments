@@ -2,21 +2,12 @@
 
 declare(strict_types=1);
 
-use Filament\Infolists\Components\TextEntry;
 use Happenv\FilamentComments\Enums\CommentFormat;
-use Happenv\FilamentComments\Filament\Components\Comment as CommentComponent;
 use Happenv\FilamentComments\Filament\Components\Comments;
 use Happenv\FilamentComments\Models\Comment;
+use Happenv\FilamentComments\Tests\Fixtures\Components\CustomCommentComponent;
 use Happenv\FilamentComments\Tests\Fixtures\Models\Post;
 use Happenv\FilamentComments\Tests\Fixtures\Models\User;
-
-class CustomCommentComponent extends CommentComponent
-{
-    public function getDefaultContentComponent(): TextEntry
-    {
-        return TextEntry::make($this->getName())->hiddenLabel()->prefix('CUSTOM:');
-    }
-}
 
 beforeEach(function (): void {
     $this->post = Post::factory()->create();

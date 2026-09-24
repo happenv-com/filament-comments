@@ -89,6 +89,7 @@
             "@rector-test",
             "@pint-test",
             "@phpstan",
+            "@psr4-test",
             "@test"
         ],
         "cs": [
@@ -101,19 +102,21 @@
         "phpstan": "phpstan analyse --ansi",
         "pint": "pint",
         "pint-test": "pint --test",
+        "psr4-test": "@composer dump-autoload --optimize --strict-psr",
         "rector": "rector process",
         "rector-test": "rector process --dry-run",
         "test": "pest --testsuite=Unit,Feature",
         "test-coverage": "pest --testsuite=Unit,Feature --coverage"
     },
     "scripts-descriptions": {
-        "ci": "Runs every CI gate locally: composer.json normalization, Rector, Pint, PHPStan and the test suite.",
+        "ci": "Runs every CI gate locally: composer.json normalization, Rector, Pint, PHPStan, PSR-4 and the test suite.",
         "cs": "Fixes code style: composer normalize, Rector, then Pint (Rector adds imports, Pint sorts them).",
         "normalize-composer": "Normalizes composer.json.",
         "normalize-composer-test": "Checks composer.json is normalized.",
         "phpstan": "Runs PHPStan.",
         "pint": "Formats the code with Pint.",
         "pint-test": "Checks the code style with Pint.",
+        "psr4-test": "Checks every class is in the file PSR-4 expects (as the optimized autoloader of an app does).",
         "rector": "Applies Rector refactorings.",
         "rector-test": "Shows pending Rector refactorings.",
         "test": "Runs the unit and feature tests.",
