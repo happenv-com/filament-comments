@@ -1,11 +1,17 @@
 # Filament Comments
 
+<div class="filament-hidden">
+
+![Filament Comments](art/banner.png)
+
+</div>
+
 [![Latest Version](https://img.shields.io/github/v/release/happenv-com/filament-comments?style=flat-square&label=version)](https://github.com/happenv-com/filament-comments/releases)
 [![Tests](https://img.shields.io/github/actions/workflow/status/happenv-com/filament-comments/tests.yml?label=tests&style=flat-square)](https://github.com/happenv-com/filament-comments/actions/workflows/tests.yml)
 [![PHPStan](https://img.shields.io/github/actions/workflow/status/happenv-com/filament-comments/phpstan.yml?label=phpstan&style=flat-square)](https://github.com/happenv-com/filament-comments/actions/workflows/phpstan.yml)
 [![Quality](https://img.shields.io/github/actions/workflow/status/happenv-com/filament-comments/quality.yml?label=code%20quality&style=flat-square)](https://github.com/happenv-com/filament-comments/actions/workflows/quality.yml)
 [![Total Downloads](https://img.shields.io/packagist/dt/happenv-com/filament-comments.svg?style=flat-square)](https://packagist.org/packages/happenv-com/filament-comments)
-[![License](https://img.shields.io/github/license/happenv-com/filament-comments.svg?style=flat-square)](LICENSE.md)
+[![License](https://img.shields.io/github/license/happenv-com/filament-comments.svg?style=flat-square)](https://github.com/happenv-com/filament-comments/blob/2.x/LICENSE.md)
 
 Polymorphic, paginated comments for Filament 4 and 5. Drop a `Comments` component into any infolist or form schema and
 the current record gets a comment list with a rich-text (or Markdown) form, quoting, shareable deep links and
@@ -571,29 +577,29 @@ The test suite runs on Pest against Filament 4 (Livewire 3) and Filament 5 (Live
 
 ## Upgrading
 
-Breaking changes and how to migrate are described in [UPGRADING](UPGRADING.md) for every major version.
+Breaking changes and how to migrate are described in [UPGRADING](https://github.com/happenv-com/filament-comments/blob/2.x/UPGRADING.md) for every major version.
 
 ## Changelog
 
-See [CHANGELOG](CHANGELOG.md) and [GitHub releases](https://github.com/happenv-com/filament-comments/releases) for what has changed recently.
+See [CHANGELOG](https://github.com/happenv-com/filament-comments/blob/2.x/CHANGELOG.md) and [GitHub releases](https://github.com/happenv-com/filament-comments/releases) for what has changed recently.
 
 ## Contributing
 
-See [CONTRIBUTING](.github/CONTRIBUTING.md) for details.
+See [CONTRIBUTING](https://github.com/happenv-com/filament-comments/blob/2.x/.github/CONTRIBUTING.md) for details.
 
 ## Security vulnerabilities
 
-Please review [our security policy](.github/SECURITY.md) on how to report security vulnerabilities.
+Please review [our security policy](https://github.com/happenv-com/filament-comments/blob/2.x/.github/SECURITY.md) on how to report security vulnerabilities.
 
 ## Credits
 
 - [Happenv sp. z o.o.](https://happenv.com)
 - [webard](https://github.com/webard)
-- [All contributors](../../contributors)
+- [All contributors](https://github.com/happenv-com/filament-comments/contributors)
 
 ## License
 
-The MIT License (MIT). See [License File](LICENSE.md) for more information.
+The MIT License (MIT). See [License File](https://github.com/happenv-com/filament-comments/blob/2.x/LICENSE.md) for more information.
 
 ---
 
