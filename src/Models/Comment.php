@@ -21,7 +21,7 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 /**
  * @property int|string $id
  * @property string $commentable_type
- * @property string $commentable_id
+ * @property int|string $commentable_id
  * @property int|string $author_id
  * @property string $content
  * @property CarbonInterface $created_at

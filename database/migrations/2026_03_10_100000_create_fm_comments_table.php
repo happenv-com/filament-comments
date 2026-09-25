@@ -13,7 +13,8 @@ return new class extends Migration
         Schema::create('comments', function (Blueprint $table): void {
             $table->id();
 
-            $table->nullableUuidMorphs('commentable');
+            // Commentable models with UUID or ULID keys: nullableUuidMorphs() / nullableUlidMorphs().
+            $table->nullableMorphs('commentable');
 
             $table->foreignId('author_id')->constrained('users');
 
