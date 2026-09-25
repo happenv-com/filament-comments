@@ -521,8 +521,14 @@ Comments::make()->commentItemComponent(CommentWithEmail::class);
 
 #### Comment model
 
-`HasComments` resolves the comment model from the container, so you can replace it with a subclass of
-`Models\Comment` in a service provider:
+Set `comment_model` in `config/filament-comments.php` to a subclass of `Models\Comment` — for example to add
+`HasUuids` (see [UUID or ULID keys](#uuid-or-ulid-keys)):
+
+```php
+'comment_model' => App\Models\Comment::class,
+```
+
+Binding the model in the container, as before the option existed, still works when `comment_model` is not set:
 
 ```php
 use Happenv\FilamentComments\Models\Comment;

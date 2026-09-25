@@ -63,6 +63,20 @@ it('uses the comment model set in the config', function (): void {
         ->assertDispatched('highlight-comment', commentId: $comment->getKey(), relationship: 'comments');
 });
 
+it('still uses a comment model bound in the container when the config is not set', function (): void {
+    app()->bind(Comment::class, UuidComment::class);
+
+    expect(CommentModel::resolve())->toBe(UuidComment::class)
+        ->and(UuidPost::create(['title' => 'Bound'])->comments()->getRelated())->toBeInstanceOf(UuidComment::class);
+});
+
+it('prefers the config over a container binding', function (): void {
+    app()->bind(Comment::class, UuidComment::class);
+    config(['filament-comments.comment_model' => Comment::class]);
+
+    expect(CommentModel::resolve())->toBe(Comment::class);
+});
+
 it('refuses a comment model that does not extend the package model', function (mixed $model): void {
     config(['filament-comments.comment_model' => $model]);
 
