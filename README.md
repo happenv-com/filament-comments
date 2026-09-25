@@ -549,12 +549,9 @@ $comment = Comment::factory()
 
 ## Translations
 
-The package ships these languages:
+The package ships in every locale Filament ships:
 
-| Language (`code`) |
-|-------------------|
-| English (`en`)    |
-| Polish (`pl`)     |
+`am` `ar` `az` `bg` `bn` `bs` `ca` `ckb` `cs` `da` `de` `el` `en` `es` `et` `eu` `fa` `fi` `fil` `fr` `he` `hi` `hr` `hu` `hy` `id` `it` `ja` `ka` `km` `ko` `ku` `lt` `lus` `lv` `mk` `mn` `ms` `my` `nb` `ne` `nl` `pl` `pt` `pt_BR` `ro` `ru` `sk` `sl` `sq` `sr_Cyrl` `sr_Latn` `sv` `sw` `tg` `th` `tr` `uk` `ur` `uz` `vi` `zh_CN` `zh_HK` `zh_TW`
 
 Publish them to change the texts:
 
@@ -562,7 +559,7 @@ Publish them to change the texts:
 php artisan vendor:publish --tag=happenv-filament-comments-translations
 ```
 
-`tests/Unit/TranslationsTest.php` checks that every language has exactly the keys English has.
+`tests/Unit/TranslationsTest.php` checks that every language has exactly the keys English has, that nothing is left in English, and that every locale Filament ships has a translation.
 
 ## Development
 
