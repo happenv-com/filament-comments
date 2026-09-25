@@ -54,9 +54,10 @@ php artisan vendor:publish --tag=happenv-filament-comments-migrations
 php artisan migrate
 ```
 
-The table has a polymorphic `commentable` relation created with `nullableUuidMorphs()` (so `commentable_id` is a UUID
-column), an `author_id` foreign key to the `users` table, a `content` text column and timestamps. Edit the published
-migration before running it if your commentable models do not use UUID keys or your authors are not stored in `users`.
+The table has an auto-incrementing `id`, a polymorphic `commentable` relation created with `nullableMorphs()` (so
+`commentable_id` is an integer column), an `author_id` foreign key to the `users` table, a `content` text column and
+timestamps. Edit the published migration before running it if your models use UUID or ULID keys (see
+[UUID or ULID keys](#uuid-or-ulid-keys)) or your authors are not stored in `users`.
 
 > [!IMPORTANT]
 > If you have not set up a custom theme and are using Filament Panels, follow the instructions in the Filament docs
@@ -85,12 +86,19 @@ return [
      * Model of comment authors. Defaults to the model of the "users" auth provider.
      */
     'author_model' => null,
+
+    /*
+     * Model of comments. Must extend Happenv\FilamentComments\Models\Comment,
+     * e.g. to add HasUuids together with a matching migration.
+     */
+    'comment_model' => null,
 ];
 ```
 
 | Key            | Default | What it does |
 |----------------|---------|--------------|
 | `author_model` | `null`  | Eloquent model of comment authors (`Comment::author()`, the default mention provider). `null` falls back to `auth.providers.users.model`. |
+| `comment_model` | `null` | Eloquent model of comments, used by `HasComments`. Must extend `Happenv\FilamentComments\Models\Comment`. `null` uses the package's own model. |
 
 The author model does not depend on the logged-in user. If neither setting points to an Eloquent model, a
 `LogicException` is thrown. For example:
@@ -105,6 +113,35 @@ Optionally, publish the views and translations:
 php artisan vendor:publish --tag=happenv-filament-comments-views
 php artisan vendor:publish --tag=happenv-filament-comments-translations
 ```
+
+### UUID or ULID keys
+
+The migration uses standard auto-incrementing keys. If your models use UUIDs (or ULIDs), change the published
+migration before running it:
+
+- **Commentable models with UUID keys** — replace `nullableMorphs('commentable')` with `nullableUuidMorphs('commentable')`
+  (or `nullableUlidMorphs()`).
+- **UUID keys for the comments themselves** — replace `$table->id()` with `$table->uuid('id')->primary()`, and point
+  `comment_model` to your own model that adds `HasUuids`:
+
+```php
+namespace App\Models;
+
+use Happenv\FilamentComments\Models\Comment as BaseComment;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+
+class Comment extends BaseComment
+{
+    use HasUuids;
+}
+```
+
+```php
+// config/filament-comments.php
+'comment_model' => App\Models\Comment::class,
+```
+
+Relationships you define yourself (such as `internalNotes()` below) should use the same model.
 
 ## Usage
 

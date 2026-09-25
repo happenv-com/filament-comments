@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Happenv\FilamentComments\Concerns;
 
 use Happenv\FilamentComments\Models\Comment;
+use Happenv\FilamentComments\Support\CommentModel;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
@@ -19,6 +20,6 @@ trait HasComments
      */
     public function comments(): MorphMany
     {
-        return $this->morphMany(resolve(Comment::class)::class, 'commentable');
+        return $this->morphMany(CommentModel::resolve(), 'commentable');
     }
 }
