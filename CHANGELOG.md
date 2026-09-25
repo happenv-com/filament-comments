@@ -2,6 +2,17 @@
 
 All notable changes to `filament-comments` are documented in this file. Each section is written automatically from the GitHub release notes when a release is published — do not edit it by hand.
 
+## v2.1.0 - 2026-09-25
+
+<!-- Release notes generated using configuration in .github/release.yml at 2.x -->
+### What's Changed
+
+#### Other
+
+* feat: translate the comments into every locale Filament ships by @webard in https://github.com/happenv-com/filament-comments/pull/7
+
+**Full Changelog**: https://github.com/happenv-com/filament-comments/compare/v2.0.1...v2.1.0
+
 ## v2.0.1 - 2026-09-25
 
 <!-- Release notes generated using configuration in .github/release.yml at 2.x -->
