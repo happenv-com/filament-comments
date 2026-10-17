@@ -10,10 +10,12 @@ use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\RichEditor\MentionProvider;
 use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Schema;
+use Filament\Support\Facades\FilamentIcon;
 use Filament\Support\Icons\Heroicon;
 use Happenv\FilamentComments\Contracts\ConfiguresCommentForm;
 use Happenv\FilamentComments\Enums\CommentFormat;
 use Happenv\FilamentComments\Support\CommentsSettings;
+use Happenv\FilamentComments\View\CommentsIconAlias;
 
 class CommentFormSchema implements ConfiguresCommentForm
 {
@@ -35,7 +37,7 @@ class CommentFormSchema implements ConfiguresCommentForm
                 Actions::make([
                     Action::make('submit')
                         ->label(__('happenv-filament-comments::comments.submit'))
-                        ->icon(Heroicon::PaperAirplane)
+                        ->icon(FilamentIcon::resolve(CommentsIconAlias::FORM_SUBMIT) ?? Heroicon::PaperAirplane)
                         ->action('submitComment'),
                 ])->alignEnd(),
             ]);

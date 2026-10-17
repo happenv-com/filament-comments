@@ -11,8 +11,10 @@ use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
+use Filament\Support\Facades\FilamentIcon;
 use Filament\Support\Icons\Heroicon;
 use Happenv\FilamentComments\Livewire\CommentsList;
+use Happenv\FilamentComments\View\CommentsIconAlias;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Js;
 use Override;
@@ -197,7 +199,7 @@ class Comment extends Component
             ->label(__('happenv-filament-comments::comments.quote'))
             ->iconButton()
             ->tooltip(__('happenv-filament-comments::comments.quote_tooltip'))
-            ->icon(Heroicon::ChatBubbleBottomCenterText)
+            ->icon(FilamentIcon::resolve(CommentsIconAlias::COMMENT_QUOTE) ?? Heroicon::ChatBubbleBottomCenterText)
             ->visible(fn (CommentsList $livewire): bool => $livewire->settings->canComment)
             ->actionJs(function (Model $record, CommentsList $livewire): string {
                 $commentId = Js::from($record->getKey());
@@ -216,7 +218,7 @@ class Comment extends Component
             ->label(__('happenv-filament-comments::comments.share'))
             ->iconButton()
             ->tooltip(__('happenv-filament-comments::comments.copy_link'))
-            ->icon(Heroicon::Link)
+            ->icon(FilamentIcon::resolve(CommentsIconAlias::COMMENT_SHARE) ?? Heroicon::Link)
             ->actionJs(function (Model $record, CommentsList $livewire): string {
                 $parameter = Js::from($livewire->settings->commentIdParameter());
                 $commentId = Js::from((string) $record->getKey());
