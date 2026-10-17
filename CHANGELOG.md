@@ -2,6 +2,27 @@
 
 All notable changes to `filament-comments` are documented in this file. Each section is written automatically from the GitHub release notes when a release is published — do not edit it by hand.
 
+## v2.2.0 - 2026-10-17
+
+<!-- Release notes generated using configuration in .github/release.yml at 2.x -->
+### What's Changed
+
+#### Dependencies
+
+* chore(deps): bump trufflesecurity/trufflehog from 3.97.5 to 3.97.9 in the github-actions group by @dependabot[bot] in https://github.com/happenv-com/filament-comments/pull/8
+
+#### Other
+
+* ci: run Copilot code review on GitHub-hosted runners by @webard in https://github.com/happenv-com/filament-comments/pull/9
+* chore: configure Laravel Moat by @webard in https://github.com/happenv-com/filament-comments/pull/10
+* feat: expose hardcoded icons as Filament icon aliases by @webard in https://github.com/happenv-com/filament-comments/pull/12
+
+### New Contributors
+
+* @dependabot[bot] made their first contribution in https://github.com/happenv-com/filament-comments/pull/8
+
+**Full Changelog**: https://github.com/happenv-com/filament-comments/compare/v2.1.0...v2.2.0
+
 ## v2.1.0 - 2026-09-25
 
 <!-- Release notes generated using configuration in .github/release.yml at 2.x -->
