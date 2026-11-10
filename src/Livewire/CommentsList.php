@@ -4,16 +4,20 @@ declare(strict_types=1);
 
 namespace Happenv\FilamentComments\Livewire;
 
+use Carbon\CarbonImmutable;
+use Carbon\CarbonInterface;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Schema;
+use Happenv\FilamentComments\Contracts\ProvidesTimelineEvents;
 use Happenv\FilamentComments\Enums\CommentFormat;
 use Happenv\FilamentComments\Enums\CommentFormLocation;
 use Happenv\FilamentComments\Enums\CommentsPaginationType;
 use Happenv\FilamentComments\Support\CommentsSettings;
+use Happenv\FilamentComments\Support\TimelineEvent;
 use Illuminate\Contracts\Pagination\CursorPaginator;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Contracts\View\View;
@@ -121,12 +125,20 @@ class CommentsList extends LivewireComponent implements HasActions, HasForms
     }
 
     /**
+     * The page's comments, newest first, with the timeline events of the same stretch of time between
+     * them. With the form below the list the order is turned around, so it reads like a conversation.
+     *
      * @param  Paginator<int, Model>|CursorPaginator<int, Model>  $comments
-     * @return Collection<int, Model>
+     * @return Collection<int, Model|TimelineEvent>
      */
     public function getItems(Paginator | CursorPaginator $comments): Collection
     {
+        /** @var Collection<int, Model|TimelineEvent> $items */
         $items = collect($comments->items());
+
+        if ($this->settings->timelineEvents !== null) {
+            $items = $this->withTimelineEvents($items, $comments);
+        }
 
         // With the form below the list reads like a conversation: the newest comment sits right above the form.
         if ($this->settings->formLocation === CommentFormLocation::Below) {
@@ -134,6 +146,66 @@ class CommentsList extends LivewireComponent implements HasActions, HasForms
         }
 
         return $items;
+    }
+
+    /**
+     * Each event goes on the page of the comment that came just before it, so an event between two pages
+     * shows once, on the newer one's side of the older comment; events older than every comment go on the
+     * last page, events newer than every comment on the first.
+     *
+     * @param  Collection<int, Model|TimelineEvent>  $items  The page's comments, newest first.
+     * @param  Paginator<int, Model>|CursorPaginator<int, Model>  $comments
+     * @return Collection<int, Model|TimelineEvent>
+     */
+    protected function withTimelineEvents(Collection $items, Paginator | CursorPaginator $comments): Collection
+    {
+        /** @var class-string<ProvidesTimelineEvents> $providerClass */
+        $providerClass = $this->settings->timelineEvents;
+
+        $oldest = $items->last();
+        $newest = $items->first();
+
+        $from = $oldest instanceof Model && $comments->hasMorePages() ? $this->momentOf($oldest) : null;
+        $onFirstPage = $comments instanceof CursorPaginator ? $comments->cursor() === null : $comments->currentPage() === 1;
+        $until = $newest instanceof Model && ! $onFirstPage ? $this->momentAfter($newest) : null;
+
+        $events = [];
+
+        foreach (app($providerClass)->between($this->record, $from, $until) as $event) {
+            $events[] = $event;
+        }
+
+        // Newest first, like the comments; an event and a comment at the same moment put the event after the comment.
+        return $items->concat($events)
+            ->sortBy([
+                fn (Model | TimelineEvent $a, Model | TimelineEvent $b): int => $this->momentOf($b)->getTimestampMs() <=> $this->momentOf($a)->getTimestampMs(),
+                fn (Model | TimelineEvent $a, Model | TimelineEvent $b): int => ($b instanceof TimelineEvent ? 1 : 0) <=> ($a instanceof TimelineEvent ? 1 : 0),
+            ])
+            ->values();
+    }
+
+    protected function momentOf(Model | TimelineEvent $item): CarbonInterface
+    {
+        if ($item instanceof TimelineEvent) {
+            return $item->at;
+        }
+
+        return CarbonImmutable::parse($item->getAttribute($this->settings->sortColumn));
+    }
+
+    /**
+     * When the next newer comment was written — where this page's stretch of time ends.
+     */
+    protected function momentAfter(Model $newest): ?CarbonInterface
+    {
+        $sortColumn = $this->settings->sortColumn;
+
+        $next = $this->getRelationship()
+            ->where($sortColumn, '>', $newest->getAttribute($sortColumn))
+            ->orderBy($sortColumn)
+            ->first();
+
+        return $next instanceof Model ? $this->momentOf($next) : null;
     }
 
     public function commentItem(Model $comment): Schema

@@ -11,6 +11,7 @@ use Happenv\FilamentComments\Actions\SaveCommentAction;
 use Happenv\FilamentComments\Contracts\ConfiguresCommentForm;
 use Happenv\FilamentComments\Contracts\ConfiguresCommentItem;
 use Happenv\FilamentComments\Contracts\ProvidesMentions;
+use Happenv\FilamentComments\Contracts\ProvidesTimelineEvents;
 use Happenv\FilamentComments\Contracts\SavesComment;
 use Happenv\FilamentComments\Enums\CommentFormat;
 use Happenv\FilamentComments\Enums\CommentFormLocation;
@@ -42,6 +43,11 @@ class Comments extends Component
     protected array $mentionProviders = [];
 
     protected CommentFormLocation | Closure $formLocation = CommentFormLocation::Above;
+
+    /**
+     * @var class-string<ProvidesTimelineEvents>|Closure|null
+     */
+    protected string | Closure | null $timelineEvents = null;
 
     protected CommentsPaginationLocation | Closure $paginationLocation = CommentsPaginationLocation::Below;
 
@@ -138,6 +144,7 @@ class Comments extends Component
             sortColumn: $this->getSortColumn(),
             saveAction: $this->getSaveAction(),
             canComment: $this->isCommentingEnabled(),
+            timelineEvents: $this->getTimelineEvents(),
         );
     }
 
@@ -360,5 +367,25 @@ class Comments extends Component
     public function isCommentingEnabled(): bool
     {
         return (bool) $this->evaluate($this->canComment);
+    }
+
+    /**
+     * Events shown between the comments, in the order they happened.
+     *
+     * @param  class-string<ProvidesTimelineEvents>|Closure|null  $provider  Class name of the provider, or a closure returning it.
+     */
+    public function timelineEvents(string | Closure | null $provider): static
+    {
+        $this->timelineEvents = $provider;
+
+        return $this;
+    }
+
+    /**
+     * @return class-string<ProvidesTimelineEvents>|null
+     */
+    public function getTimelineEvents(): ?string
+    {
+        return $this->evaluate($this->timelineEvents);
     }
 }
