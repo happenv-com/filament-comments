@@ -178,7 +178,8 @@ class CommentsList extends LivewireComponent implements HasActions, HasForms
         // Newest first, like the comments; an event and a comment at the same moment put the event after the comment.
         return $items->concat($events)
             ->sortBy([
-                fn (Model | TimelineEvent $a, Model | TimelineEvent $b): int => $this->momentOf($b)->getTimestampMs() <=> $this->momentOf($a)->getTimestampMs(),
+                // Whole moments, microseconds included: rounded to milliseconds, two distinct events would tie.
+                fn (Model | TimelineEvent $a, Model | TimelineEvent $b): int => $this->momentOf($b) <=> $this->momentOf($a),
                 fn (Model | TimelineEvent $a, Model | TimelineEvent $b): int => ($b instanceof TimelineEvent ? 1 : 0) <=> ($a instanceof TimelineEvent ? 1 : 0),
             ])
             ->values();
@@ -194,15 +195,24 @@ class CommentsList extends LivewireComponent implements HasActions, HasForms
     }
 
     /**
-     * When the next newer comment was written — where this page's stretch of time ends.
+     * When the next newer comment was written — where this page's stretch of time ends. "Next" in the
+     * list's own order, the sort column and then the key, so a comment written in the same moment as this
+     * page's newest one still counts: the bound may equal that moment.
      */
     protected function momentAfter(Model $newest): ?CarbonInterface
     {
         $sortColumn = $this->settings->sortColumn;
+        $moment = $newest->getAttribute($sortColumn);
+        $key = $newest->getQualifiedKeyName();
 
         $next = $this->getRelationship()
-            ->where($sortColumn, '>', $newest->getAttribute($sortColumn))
+            ->where(fn ($query) => $query
+                ->where($sortColumn, '>', $moment)
+                ->orWhere(fn ($query) => $query
+                    ->where($sortColumn, $moment)
+                    ->where($key, '>', $newest->getKey())))
             ->orderBy($sortColumn)
+            ->orderBy($key)
             ->first();
 
         return $next instanceof Model ? $this->momentOf($next) : null;

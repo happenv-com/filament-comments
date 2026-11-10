@@ -8,6 +8,7 @@ use Happenv\FilamentComments\Filament\Components\Comments;
 use Happenv\FilamentComments\Models\Comment;
 use Happenv\FilamentComments\Support\TimelineEvent;
 use Happenv\FilamentComments\Tests\Fixtures\Models\Post;
+use Happenv\FilamentComments\Tests\Fixtures\Models\User;
 use Happenv\FilamentComments\Tests\Fixtures\Support\FixedTimelineEvents;
 use Illuminate\Contracts\Pagination\CursorPaginator;
 use Illuminate\Support\Carbon;
@@ -125,3 +126,43 @@ it('asks for nothing when no provider is set', function (): void {
 it('refuses a provider that does not implement the contract', function (): void {
     Comments::make()->timelineEvents(Post::class)->toSettings();
 })->throws(InvalidArgumentException::class);
+
+it('orders events that differ by microseconds', function (): void {
+    FixedTimelineEvents::$events = [
+        new TimelineEvent('first', Carbon::parse('2026-01-01 12:00:00.000100')->toImmutable(), 'first'),
+        new TimelineEvent('second', Carbon::parse('2026-01-01 12:00:00.000200')->toImmutable(), 'second'),
+    ];
+
+    commentsList($this->post, withEvents())
+        ->assertViewHas('items', fn (Collection $items): bool => timeline($items) === ['event: second', 'event: first']);
+});
+
+it('shows an event once when comments of the same moment span two pages', function (CommentsPaginationType $type): void {
+    $author = User::factory()->create();
+    $moment = Carbon::parse('2026-01-01 12:05:00');
+
+    foreach (range(1, 7) as $i) {
+        Comment::factory()->for($this->post, 'commentable')->withAuthor($author)->create([
+            'content' => "<p>Same {$i}</p>",
+            'created_at' => $moment,
+            'updated_at' => $moment,
+        ]);
+    }
+
+    FixedTimelineEvents::$events = [eventAt(5, 'same moment'), eventAt(9, 'later')];
+
+    $list = commentsList($this->post, withEvents()->paginationType($type)->paginationOptions([5])->paginationDefaultPerPage(5));
+    $first = timeline($list->viewData('items'));
+
+    $comments = $list->viewData('comments');
+    $list->call('setPage', $comments instanceof CursorPaginator ? $comments->nextCursor()->encode() : 2, 'comments_page');
+    $second = timeline($list->viewData('items'));
+
+    $events = array_values(array_filter([...$first, ...$second], static fn (string $line): bool => str_starts_with($line, 'event: ')));
+
+    expect($events)->toEqualCanonicalizing(['event: later', 'event: same moment']);
+})->with([
+    'simple' => [CommentsPaginationType::Simple],
+    'standard' => [CommentsPaginationType::Standard],
+    'cursor' => [CommentsPaginationType::Cursor],
+]);
