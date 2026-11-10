@@ -347,6 +347,41 @@ class TeamMentionProvider implements ProvidesMentions
 The bundled `UserMentionProvider` searches the `name` column of the [author model](#configuration) (up to 10 results)
 with the `@` character.
 
+### Timeline events
+
+Show things that happened to the record — a status change, an assignment — between its comments, in the order they
+happened. Implement `ProvidesTimelineEvents` and pass the class to the component:
+
+```php
+use Carbon\CarbonInterface;
+use Happenv\FilamentComments\Contracts\ProvidesTimelineEvents;
+use Happenv\FilamentComments\Support\TimelineEvent;
+use Illuminate\Database\Eloquent\Model;
+
+final class TicketStatusEvents implements ProvidesTimelineEvents
+{
+    public function between(Model $record, ?CarbonInterface $from, ?CarbonInterface $until): iterable
+    {
+        return $record->statusChanges()
+            ->when($from, fn ($query) => $query->where('created_at', '>=', $from))
+            ->when($until, fn ($query) => $query->where('created_at', '<', $until))
+            ->get()
+            ->map(fn ($change): TimelineEvent => new TimelineEvent(
+                key: $change->id,
+                at: $change->created_at,
+                content: "Status changed to {$change->status}",
+            ));
+    }
+}
+
+Comments::make()->timelineEvents(TicketStatusEvents::class);
+```
+
+The list asks for one page at a time: `$from` is inclusive, `$until` exclusive, and a `null` bound is open. Each event
+shows on the page of the comment written just before it, so an event between two pages shows once; events older than
+every comment go on the last page, newer ones on the first. An event and a comment at the same moment put the event
+after the comment. A string `content` is escaped, an `Htmlable` is rendered as given.
+
 ### Deep links
 
 Every comment has a "copy link" action that copies a link to the current page with the comment in the query string,

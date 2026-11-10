@@ -7,6 +7,7 @@ namespace Happenv\FilamentComments\Support;
 use Happenv\FilamentComments\Contracts\ConfiguresCommentForm;
 use Happenv\FilamentComments\Contracts\ConfiguresCommentItem;
 use Happenv\FilamentComments\Contracts\ProvidesMentions;
+use Happenv\FilamentComments\Contracts\ProvidesTimelineEvents;
 use Happenv\FilamentComments\Contracts\SavesComment;
 use Happenv\FilamentComments\Enums\CommentFormat;
 use Happenv\FilamentComments\Enums\CommentFormLocation;
@@ -33,6 +34,7 @@ final readonly class CommentsSettings implements Wireable
      * @param  class-string<ConfiguresCommentItem>  $itemSchema
      * @param  class-string<Comment>  $itemComponent
      * @param  class-string<SavesComment>  $saveAction
+     * @param  class-string<ProvidesTimelineEvents>|null  $timelineEvents
      */
     public function __construct(
         public string $relationship,
@@ -50,6 +52,7 @@ final readonly class CommentsSettings implements Wireable
         public string $sortColumn,
         public string $saveAction,
         public bool $canComment,
+        public ?string $timelineEvents = null,
     ) {
         $this->assertIdentifier('relationship', $relationship);
         $this->assertIdentifier('content field', $contentField);
@@ -61,6 +64,10 @@ final readonly class CommentsSettings implements Wireable
         $this->assertImplements('form schema', $formSchema, ConfiguresCommentForm::class);
         $this->assertImplements('item schema', $itemSchema, ConfiguresCommentItem::class);
         $this->assertImplements('item component', $itemComponent, Comment::class);
+
+        if ($timelineEvents !== null) {
+            $this->assertImplements('timeline events provider', $timelineEvents, ProvidesTimelineEvents::class);
+        }
 
         foreach ($mentionProviders as $mentionProvider) {
             $this->assertImplements('mention provider', $mentionProvider, ProvidesMentions::class);
@@ -108,6 +115,8 @@ final readonly class CommentsSettings implements Wireable
             'sortColumn' => $this->sortColumn,
             'saveAction' => $this->saveAction,
             'canComment' => $this->canComment,
+            // Only when set: the payload holds scalars, and a list without events needs no key.
+            ...($this->timelineEvents !== null ? ['timelineEvents' => $this->timelineEvents] : []),
         ];
     }
 
@@ -140,6 +149,8 @@ final readonly class CommentsSettings implements Wireable
             sortColumn: $value['sortColumn'],
             saveAction: $value['saveAction'],
             canComment: $value['canComment'],
+            // Optional: a payload written before the setting existed has no such key.
+            timelineEvents: $value['timelineEvents'] ?? null,
         );
     }
 

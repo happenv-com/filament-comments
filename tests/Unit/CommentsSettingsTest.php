@@ -13,6 +13,7 @@ use Happenv\FilamentComments\Filament\MentionProviders\UserMentionProvider;
 use Happenv\FilamentComments\Filament\Schemas\CommentFormSchema;
 use Happenv\FilamentComments\Filament\Schemas\CommentItemSchema;
 use Happenv\FilamentComments\Support\CommentsSettings;
+use Happenv\FilamentComments\Tests\Fixtures\Support\FixedTimelineEvents;
 use Livewire\Wireable;
 
 function makeSettings(array $overrides = []): CommentsSettings
@@ -105,13 +106,14 @@ it('survives a Livewire round trip', function (): void {
         'paginationType' => CommentsPaginationType::Standard,
         'mentionProviders' => [UserMentionProvider::class],
         'format' => CommentFormat::Markdown,
+        'timelineEvents' => FixedTimelineEvents::class,
     ]);
 
     expect(CommentsSettings::fromLivewire($settings->toLivewire()))->toEqual($settings);
 });
 
 it('only exposes scalar values to the browser', function (): void {
-    $payload = makeSettings()->toLivewire();
+    $payload = makeSettings(['timelineEvents' => FixedTimelineEvents::class])->toLivewire();
 
     array_walk_recursive($payload, function (mixed $value): void {
         expect(is_scalar($value))->toBeTrue();

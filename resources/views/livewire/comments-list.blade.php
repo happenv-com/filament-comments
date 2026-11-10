@@ -38,6 +38,17 @@
     @endif
 
     @forelse ($items as $comment)
+        @if ($comment instanceof \Happenv\FilamentComments\Support\TimelineEvent)
+            <div
+                wire:key="timeline-event-{{ $relationship }}-{{ $comment->key }}"
+                class="fm-timeline-event"
+            >
+                {{ $comment->content }}
+            </div>
+
+            @continue
+        @endif
+
         <div
             wire:key="comment-{{ $relationship }}-{{ $comment->getKey() }}"
             id="comment-{{ $relationship }}-{{ $comment->getKey() }}"
