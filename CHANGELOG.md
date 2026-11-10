@@ -2,6 +2,23 @@
 
 All notable changes to `filament-comments` are documented in this file. Each section is written automatically from the GitHub release notes when a release is published — do not edit it by hand.
 
+## v2.3.0 - 2026-11-10
+
+<!-- Release notes generated using configuration in .github/release.yml at 2.x -->
+### What's Changed
+
+#### Dependencies
+
+* chore(deps): bump the github-actions group with 2 updates by @dependabot[bot] in https://github.com/happenv-com/filament-comments/pull/11
+* chore(deps): bump zizmorcore/zizmor-action from 0.6.4 to 0.7.1 in the github-actions group by @dependabot[bot] in https://github.com/happenv-com/filament-comments/pull/13
+* chore(deps): bump the github-actions group with 2 updates by @dependabot[bot] in https://github.com/happenv-com/filament-comments/pull/14
+
+#### Other
+
+* feat: timeline events between comments by @webard in https://github.com/happenv-com/filament-comments/pull/16
+
+**Full Changelog**: https://github.com/happenv-com/filament-comments/compare/v2.2.0...v2.3.0
+
 ## v2.2.0 - 2026-10-17
 
 <!-- Release notes generated using configuration in .github/release.yml at 2.x -->
