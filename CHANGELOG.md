@@ -2,6 +2,17 @@
 
 All notable changes to `filament-comments` are documented in this file. Each section is written automatically from the GitHub release notes when a release is published — do not edit it by hand.
 
+## v2.3.1 - 2026-11-11
+
+<!-- Release notes generated using configuration in .github/release.yml at 2.x -->
+### What's Changed
+
+#### Other
+
+* docs: ship a Laravel Boost skill by @webard in https://github.com/happenv-com/filament-comments/pull/17
+
+**Full Changelog**: https://github.com/happenv-com/filament-comments/compare/v2.3.0...v2.3.1
+
 ## v2.3.0 - 2026-11-10
 
 <!-- Release notes generated using configuration in .github/release.yml at 2.x -->
