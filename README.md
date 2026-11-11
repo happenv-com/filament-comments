@@ -596,6 +596,10 @@ php artisan vendor:publish --tag=happenv-filament-comments-translations
 
 `tests/Unit/TranslationsTest.php` checks that every language has exactly the keys English has, that nothing is left in English, and that every locale Filament ships has a translation.
 
+## AI assistants (Laravel Boost)
+
+The package ships a [Laravel Boost](https://laravel.com/docs/boost) skill, `filament-comments-development`, in `resources/boost/skills/`. `php artisan boost:install` (or `boost:update`) offers it to your coding agent: how to make a model commentable, configure the `Comments` component, write timeline event, mention and save action classes, and test the list, with the pitfalls of the locked settings.
+
 ## Development
 
 ```bash
