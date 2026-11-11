@@ -2,6 +2,21 @@
 
 All notable changes to `filament-comments` are documented in this file. Each section is written automatically from the GitHub release notes when a release is published — do not edit it by hand.
 
+## v2.3.2 - 2026-11-11
+
+<!-- Release notes generated using configuration in .github/release.yml at 2.x -->
+### What's Changed
+
+#### Dependencies
+
+* chore(deps): bump the github-actions group across 1 directory with 2 updates by @dependabot[bot] in https://github.com/happenv-com/filament-comments/pull/15
+
+#### Other
+
+* chore: keep dev-only files out of the Composer dist archive by @webard in https://github.com/happenv-com/filament-comments/pull/18
+
+**Full Changelog**: https://github.com/happenv-com/filament-comments/compare/v2.3.1...v2.3.2
+
 ## v2.3.1 - 2026-11-11
 
 <!-- Release notes generated using configuration in .github/release.yml at 2.x -->
