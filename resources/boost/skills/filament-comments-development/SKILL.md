@@ -47,22 +47,57 @@ Config (`--tag=happenv-filament-comments-config`, file `config/filament-comments
 
 ```php
 use Happenv\FilamentComments\Concerns\HasComments;
+
+class Ticket extends Model
+{
+    use HasComments; // adds comments(): MorphMany over every comment of the record
+}
+```
+
+The relationship method must declare a `HasOneOrMany` return type (`MorphMany`, `HasMany`), or be registered with `resolveRelationUsing()`; otherwise mounting throws `InvalidArgumentException`. This guard stops the browser-supplied name from calling an arbitrary method. If you set `comment_model`, use that class in your own relationships too.
+
+### A second list (internal notes)
+
+A second relationship is only a query over the same `comments` table: it isolates nothing by itself. `HasComments::comments()` has no condition, so it also returns whatever another relationship filters, and the default `SaveCommentAction` writes only the content and the author. For a list that must stay apart, add a trusted column (e.g. `$table->boolean('is_internal')->default(false)` in the published migration), give **both** relationships complementary conditions, and save through an action that sets the column:
+
+```php
 use Happenv\FilamentComments\Models\Comment;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Ticket extends Model
 {
-    use HasComments; // adds comments(): MorphMany
+    use HasComments;
 
-    // A second, independent list. The return type is REQUIRED.
+    public function comments(): MorphMany // overrides the trait: public comments only
+    {
+        return $this->morphMany(Comment::class, 'commentable')->where('is_internal', false);
+    }
+
     public function internalNotes(): MorphMany
     {
-        return $this->morphMany(Comment::class, 'commentable')->where('content', 'like', '%[internal]%');
+        return $this->morphMany(Comment::class, 'commentable')->where('is_internal', true);
     }
 }
-```
 
-The relationship method must declare a `HasOneOrMany` return type (`MorphMany`, `HasMany`), or be registered with `resolveRelationUsing()`; otherwise mounting throws `InvalidArgumentException`. This guard stops the browser-supplied name from calling an arbitrary method. If you set `comment_model`, use that class in your own relationships too.
+final class SaveInternalNote implements SavesComment
+{
+    public function __invoke(Model $record, array $data, Authenticatable $author, CommentsSettings $settings): Model
+    {
+        $relationship = $record->{$settings->relationship}();
+
+        $note = $relationship->make();
+        $note->setAttribute($settings->contentField, $data[$settings->contentField]);
+        $note->setAttribute('is_internal', true);
+        $note->author()->associate($author);
+
+        return $relationship->save($note);
+    }
+}
+
+Comments::make('internalNotes')
+    ->saveAction(SaveInternalNote::class)
+    ->visible(fn (): bool => auth()->user()->isStaff()); // who may read is still your authorization
+```
 
 ## Adding the component
 
@@ -77,7 +112,8 @@ use Happenv\FilamentComments\Filament\MentionProviders\UserMentionProvider;
 public static function infolist(Schema $schema): Schema
 {
     return $schema->components([
-        Comments::make(), // relationship `comments`
+        Comments::make() // relationship `comments`
+            ->mentionProviders([UserMentionProvider::class]), // an ARRAY; Html format only; adds to the list
 
         Comments::make('internalNotes')
             ->formLocation(CommentFormLocation::Below)             // Above (default) | Below
@@ -88,14 +124,14 @@ public static function infolist(Schema $schema): Schema
             ->commentFormat(CommentFormat::Markdown)               // Html (default, RichEditor) | Markdown
             ->sortColumn('created_at')                             // newest first, then by primary key
             ->commentItemContentFieldName('content')
-            ->mentionProviders([UserMentionProvider::class])       // Html format only; adds to the list
+            ->saveAction(SaveInternalNote::class)
             ->canComment(fn (Ticket $record): bool => auth()->user()->can('comment', $record))
             ->visible(fn (): bool => auth()->user()->isStaff()),
     ]);
 }
 ```
 
-- Every setter takes a value or a closure (Filament injections: `$record`, `$livewire`, ...). Closures run once, at mount.
+- Every setter takes a value or a closure (Filament injections: `$record`, `$livewire`, ...), except `mentionProviders()`, which takes an array whose entries are class names or closures returning one (`mentionProvider()` takes a single class name or closure). Closures run once, at mount.
 - The component hides itself while the schema has no record (create pages).
 - `canComment(false)` hides the form and the quote action and makes `submitComment` a no-op. It does **not** hide the list: use `visible()` / `hidden()` for who may read.
 - Submitting also needs a logged-in user (`Auth::user()`) and non-empty content; otherwise a danger notification, nothing saved.
@@ -174,7 +210,7 @@ public function setUpCommentsRichContent(Comment $comment): Closure
 | `mentionProvider()` / `mentionProviders()` | `Contracts\ProvidesMentions` | none |
 | `timelineEvents()` | `Contracts\ProvidesTimelineEvents` | none |
 
-Each accepts a class name or a closure **returning a class name**. A class that does not implement its contract throws `InvalidArgumentException` when the settings are built.
+Each accepts a class name or a closure **returning a class name**; `mentionProviders()` takes an array of those (`mentionProviders([TeamMentionProvider::class])`). A class that does not implement its contract throws `InvalidArgumentException` when the settings are built.
 
 ```php
 use Happenv\FilamentComments\Actions\SaveCommentAction;
@@ -194,7 +230,18 @@ final class SaveAndNotify implements SavesComment
 ```
 
 - Form: extend `CommentFormSchema` and override `htmlFormatInput(string $contentField, array $mentions): RichEditor` or `markdownFormatInput(string $contentField): MarkdownEditor`. A from-scratch `ConfiguresCommentForm::configure(Schema $schema, CommentsSettings $settings)` must still have an action calling the list's `submitComment` method and use `$settings->contentField` as the field name.
-- Item: `ConfiguresCommentItem::configure(Schema $schema, CommentsSettings $settings)` usually returns `$settings->itemComponent::make($settings->contentField)->...`.
+- Item: `ConfiguresCommentItem::configure(Schema $schema, CommentsSettings $settings): Schema` returns the given schema with the item component inside it, as `CommentItemSchema` does:
+
+```php
+public static function configure(Schema $schema, CommentsSettings $settings): Schema
+{
+    return $schema->components([
+        $settings->itemComponent::make($settings->contentField)
+            ->markdown($settings->format === CommentFormat::Markdown)
+            ->footerComponent(false),
+    ]);
+}
+```
 - Item component parts: `headerComponent()`, `authorComponent()`, `createdAtComponent()`, `contentComponent()`, `footerComponent()` take a component, a closure returning one, or `false` to remove it; `markdown()` switches the content renderer. For new defaults, subclass `Comment` and override `getDefault{Header,Author,CreatedAt,Content,Footer}Component()`, `getQuoteAction()` or `getShareAction()`.
 - Icons: register `Happenv\FilamentComments\View\CommentsIconAlias::FORM_SUBMIT`, `COMMENT_QUOTE`, `COMMENT_SHARE` with `FilamentIcon::register([...])`.
 
