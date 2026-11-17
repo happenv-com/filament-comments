@@ -193,6 +193,11 @@ class Comment extends Component
      */
     public function isInReadOnlyList(): bool
     {
+        // A comment built on its own (not yet placed in a schema) is in no list at all.
+        if (! isset($this->container)) {
+            return false;
+        }
+
         $livewire = $this->getLivewire();
 
         return $livewire instanceof CommentsList && $livewire->settings->readOnly;
