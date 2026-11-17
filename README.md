@@ -305,15 +305,15 @@ plain identifier.
 Comments::make()->canComment(fn (Issue $record): bool => auth()->user()->can('comment', $record));
 ```
 
+`true` by default. When it is `false`, the form and the quote action are hidden and the list refuses to save a
+comment. Submitting a comment also requires a logged-in user and non-empty content; otherwise the user gets a
+notification and nothing is saved.
+
 For a place that only shows a record — a preview, a report, an assistant's answer — make the comments read-only. Commenting is then off whatever `canComment()` says, the actions of a comment (quote, share, and any your item schema adds) are hidden, and the list itself refuses to post, quote or mount an action, so a client that sends the calls anyway changes nothing:
 
 ```php
 Comments::make()->readOnly();
 ```
-
-`true` by default. When it is `false`, the form and the quote action are hidden and the list refuses to save a
-comment. Submitting a comment also requires a logged-in user and non-empty content; otherwise the user gets a
-notification and nothing is saved.
 
 #### Mentions
 
