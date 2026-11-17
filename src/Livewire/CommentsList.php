@@ -6,6 +6,7 @@ namespace Happenv\FilamentComments\Livewire;
 
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
+use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Concerns\InteractsWithForms;
@@ -39,7 +40,11 @@ use ReflectionNamedType;
  */
 class CommentsList extends LivewireComponent implements HasActions, HasForms
 {
-    use InteractsWithActions;
+    use InteractsWithActions {
+        mountAction as private mountActionOfAnyList;
+        callMountedAction as private callMountedActionOfAnyList;
+        getMountedAction as private getMountedActionOfAnyList;
+    }
     use InteractsWithForms;
     use WithPagination;
 
@@ -230,8 +235,55 @@ class CommentsList extends LivewireComponent implements HasActions, HasForms
             ->statePath('data');
     }
 
+    /**
+     * A read-only list mounts no action, whatever the client asks for: the actions a comment offers (and any an
+     * item schema adds) are hidden there, and this keeps them from running all the same.
+     *
+     * @param  array<string, mixed>  $arguments
+     * @param  array<string, mixed>  $context
+     */
+    public function mountAction(string $name, array $arguments = [], array $context = []): mixed
+    {
+        if ($this->settings->readOnly) {
+            return null;
+        }
+
+        return $this->mountActionOfAnyList($name, $arguments, $context);
+    }
+
+    /**
+     * `mountedActions` is client state, so an action can be "mounted" without mountAction() and then called here:
+     * a read-only list runs nothing.
+     *
+     * @param  array<string, mixed>  $arguments
+     */
+    public function callMountedAction(array $arguments = []): mixed
+    {
+        if ($this->settings->readOnly) {
+            return null;
+        }
+
+        return $this->callMountedActionOfAnyList($arguments);
+    }
+
+    /**
+     * Whatever the client wrote into `mountedActions`, a read-only list has no mounted action: no modal renders.
+     */
+    public function getMountedAction(?int $actionNestingIndex = null): ?Action
+    {
+        if ($this->settings->readOnly) {
+            return null;
+        }
+
+        return $this->getMountedActionOfAnyList($actionNestingIndex);
+    }
+
     public function quoteComment(string | int $commentId): void
     {
+        if (! $this->settings->canComment) {
+            return;
+        }
+
         $comment = $this->getRelationship()->whereKey($commentId)->first();
 
         if ($comment === null) {

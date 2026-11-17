@@ -53,7 +53,12 @@ final readonly class CommentsSettings implements Wireable
         public string $saveAction,
         public bool $canComment,
         public ?string $timelineEvents = null,
+        public bool $readOnly = false,
     ) {
+        if ($readOnly && $canComment) {
+            throw new InvalidArgumentException('Read-only comments cannot be commented on: canComment must be false when readOnly is true.');
+        }
+
         $this->assertIdentifier('relationship', $relationship);
         $this->assertIdentifier('content field', $contentField);
         $this->assertIdentifier('sort column', $sortColumn);
@@ -117,6 +122,7 @@ final readonly class CommentsSettings implements Wireable
             'canComment' => $this->canComment,
             // Only when set: the payload holds scalars, and a list without events needs no key.
             ...($this->timelineEvents !== null ? ['timelineEvents' => $this->timelineEvents] : []),
+            ...($this->readOnly ? ['readOnly' => true] : []),
         ];
     }
 
@@ -151,6 +157,7 @@ final readonly class CommentsSettings implements Wireable
             canComment: $value['canComment'],
             // Optional: a payload written before the setting existed has no such key.
             timelineEvents: $value['timelineEvents'] ?? null,
+            readOnly: ($value['readOnly'] ?? false) === true,
         );
     }
 

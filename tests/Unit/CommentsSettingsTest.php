@@ -169,3 +169,35 @@ it('derives per-relationship query parameter names', function (): void {
         ->pageName()->toBe('internalNotes_page')
         ->commentIdParameter()->toBe('internalNotes_comment_id');
 });
+
+it('carries the read-only mode through Livewire, and reads an older payload as not read-only', function (): void {
+    $readOnly = makeSettings(['readOnly' => true, 'canComment' => false]);
+    $payload = makeSettings()->toLivewire();
+
+    expect(CommentsSettings::fromLivewire($readOnly->toLivewire())->readOnly)->toBeTrue()
+        ->and($payload)->not->toHaveKey('readOnly')
+        ->and(CommentsSettings::fromLivewire($payload)->readOnly)->toBeFalse();
+});
+
+it('turns commenting off when the comments are read-only', function (): void {
+    $settings = Comments::make()->canComment()->readOnly()->toSettings();
+
+    expect($settings->readOnly)->toBeTrue()
+        ->and($settings->canComment)->toBeFalse();
+});
+
+it('refuses settings that are read-only and yet open to comments', function (): void {
+    makeSettings(['readOnly' => true, 'canComment' => true]);
+})->throws(InvalidArgumentException::class, 'canComment must be false');
+
+it('resolves the read-only switch once', function (): void {
+    $calls = 0;
+
+    $settings = Comments::make()->readOnly(function () use (&$calls): bool {
+        return ++$calls === 1;
+    })->toSettings();
+
+    expect($calls)->toBe(1)
+        ->and($settings->readOnly)->toBeTrue()
+        ->and($settings->canComment)->toBeFalse();
+});
