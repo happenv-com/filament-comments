@@ -65,5 +65,5 @@ it('hides the actions a replaced footer of a comment adds, on a read-only list o
 });
 
 it('keeps the unguarded action methods out of reach of the client', function (string $method): void {
-    expect(new ReflectionMethod(CommentsList::class, $method)->isPublic())->toBeFalse();
+    expect((new ReflectionMethod(CommentsList::class, $method))->isPublic())->toBeFalse();
 })->with(['mountActionOfAnyList', 'callMountedActionOfAnyList', 'getMountedActionOfAnyList']);
