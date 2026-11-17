@@ -2,6 +2,17 @@
 
 All notable changes to `filament-comments` are documented in this file. Each section is written automatically from the GitHub release notes when a release is published — do not edit it by hand.
 
+## v2.4.0 - 2026-11-17
+
+<!-- Release notes generated using configuration in .github/release.yml at 2.x -->
+### What's Changed
+
+#### Other
+
+* feat: read-only comments by @webard in https://github.com/happenv-com/filament-comments/pull/19
+
+**Full Changelog**: https://github.com/happenv-com/filament-comments/compare/v2.3.2...v2.4.0
+
 ## v2.3.2 - 2026-11-11
 
 <!-- Release notes generated using configuration in .github/release.yml at 2.x -->
