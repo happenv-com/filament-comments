@@ -55,6 +55,10 @@ final readonly class CommentsSettings implements Wireable
         public ?string $timelineEvents = null,
         public bool $readOnly = false,
     ) {
+        if ($readOnly && $canComment) {
+            throw new InvalidArgumentException('Read-only comments cannot be commented on: canComment must be false when readOnly is true.');
+        }
+
         $this->assertIdentifier('relationship', $relationship);
         $this->assertIdentifier('content field', $contentField);
         $this->assertIdentifier('sort column', $sortColumn);

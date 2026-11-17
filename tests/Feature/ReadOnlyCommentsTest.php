@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Happenv\FilamentComments\Filament\Components\Comments;
 use Happenv\FilamentComments\Livewire\CommentsList;
 use Happenv\FilamentComments\Models\Comment;
+use Happenv\FilamentComments\Tests\Fixtures\Components\CommentWithOwnActionComponent;
 use Happenv\FilamentComments\Tests\Fixtures\Models\Post;
 use Happenv\FilamentComments\Tests\Fixtures\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -54,3 +55,15 @@ it('keeps a list that is not read-only as it was', function (): void {
         ->and($list->instance())->toBeInstanceOf(CommentsList::class);
     $list->assertSeeHtml('id="comment-form-comments"');
 });
+
+it('hides the actions a replaced footer of a comment adds, on a read-only list only', function (): void {
+    Comment::factory()->for($this->post, 'commentable')->withAuthor($this->author)->create(['content' => '<p>Flaggable</p>']);
+    $comments = static fn (): Comments => Comments::make()->commentItemComponent(CommentWithOwnActionComponent::class);
+
+    commentsList($this->post, $comments())->assertSee('Flag this comment');
+    commentsList($this->post, $comments()->readOnly())->assertSee('Flaggable')->assertDontSee('Flag this comment');
+});
+
+it('keeps the unguarded action methods out of reach of the client', function (string $method): void {
+    expect(new ReflectionMethod(CommentsList::class, $method)->isPublic())->toBeFalse();
+})->with(['mountActionOfAnyList', 'callMountedActionOfAnyList', 'getMountedActionOfAnyList']);

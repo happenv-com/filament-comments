@@ -315,6 +315,8 @@ For a place that only shows a record — a preview, a report, an assistant's ans
 Comments::make()->readOnly();
 ```
 
+A comment renders no footer in a read-only list — the default footer and any `footerComponent()` replacement, which is where a comment's actions live. A comment that builds its parts itself (an overridden `commentSchema()`) asks `isInReadOnlyList()` before it offers anything to do.
+
 #### Mentions
 
 ```php

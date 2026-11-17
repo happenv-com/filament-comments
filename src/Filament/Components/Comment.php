@@ -177,9 +177,25 @@ class Comment extends Component
 
     public function getFooterComponent(): Component | false | null
     {
+        // The footer is where a comment's actions live — the default one and any replacement: a read-only list has none.
+        if ($this->isInReadOnlyList()) {
+            return null;
+        }
+
         return $this->footerComponent !== null
             ? $this->evaluate($this->footerComponent)
             : $this->getDefaultFooterComponent();
+    }
+
+    /**
+     * Whether the comment renders in a read-only list, where nothing on it may be done. A comment that builds its
+     * own parts (an overridden `commentSchema()`) asks this before it offers an action.
+     */
+    public function isInReadOnlyList(): bool
+    {
+        $livewire = $this->getLivewire();
+
+        return $livewire instanceof CommentsList && $livewire->settings->readOnly;
     }
 
     public function getDefaultFooterComponent(): Component | false | null
@@ -189,9 +205,7 @@ class Comment extends Component
                 Actions::make([
                     $this->getQuoteAction(),
                     $this->getShareAction(),
-                ])
-                    ->alignStart()
-                    ->hidden(fn (CommentsList $livewire): bool => $livewire->settings->readOnly),
+                ])->alignStart(),
             ]);
     }
 

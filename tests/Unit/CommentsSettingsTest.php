@@ -185,3 +185,19 @@ it('turns commenting off when the comments are read-only', function (): void {
     expect($settings->readOnly)->toBeTrue()
         ->and($settings->canComment)->toBeFalse();
 });
+
+it('refuses settings that are read-only and yet open to comments', function (): void {
+    makeSettings(['readOnly' => true, 'canComment' => true]);
+})->throws(InvalidArgumentException::class, 'canComment must be false');
+
+it('resolves the read-only switch once', function (): void {
+    $calls = 0;
+
+    $settings = Comments::make()->readOnly(function () use (&$calls): bool {
+        return ++$calls === 1;
+    })->toSettings();
+
+    expect($calls)->toBe(1)
+        ->and($settings->readOnly)->toBeTrue()
+        ->and($settings->canComment)->toBeFalse();
+});

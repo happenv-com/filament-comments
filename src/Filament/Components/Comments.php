@@ -130,6 +130,9 @@ class Comments extends Component
 
     public function toSettings(): CommentsSettings
     {
+        // Resolved once: a callback that answered differently twice would make a read-only list that comments.
+        $readOnly = $this->isReadOnly();
+
         return new CommentsSettings(
             relationship: $this->getName(),
             formLocation: $this->getFormLocation(),
@@ -145,9 +148,9 @@ class Comments extends Component
             format: $this->getCommentFormat(),
             sortColumn: $this->getSortColumn(),
             saveAction: $this->getSaveAction(),
-            canComment: $this->isCommentingEnabled() && ! $this->isReadOnly(),
+            canComment: ! $readOnly && $this->isCommentingEnabled(),
             timelineEvents: $this->getTimelineEvents(),
-            readOnly: $this->isReadOnly(),
+            readOnly: $readOnly,
         );
     }
 

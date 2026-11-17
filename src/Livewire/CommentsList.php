@@ -41,9 +41,9 @@ use ReflectionNamedType;
 class CommentsList extends LivewireComponent implements HasActions, HasForms
 {
     use InteractsWithActions {
-        mountAction as mountActionOfAnyList;
-        callMountedAction as callMountedActionOfAnyList;
-        getMountedAction as getMountedActionOfAnyList;
+        mountAction as private mountActionOfAnyList;
+        callMountedAction as private callMountedActionOfAnyList;
+        getMountedAction as private getMountedActionOfAnyList;
     }
     use InteractsWithForms;
     use WithPagination;
