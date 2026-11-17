@@ -211,6 +211,7 @@ the usual Filament injections (`$record`, `$livewire`, ...).
 | `sortColumn()` | `'created_at'` | Column the list is sorted by, newest first. |
 | `commentItemContentFieldName()` | `'content'` | Attribute of the comment model that holds its content. |
 | `canComment()` | `true` | Whether the form and the quote action are shown and comments can be submitted. |
+| `readOnly()` | `false` | Shows the comments and nothing else: no form, no action on a comment, and the list refuses to post, quote or mount an action whatever the client asks. |
 | `mentionProvider()` / `mentionProviders()` | none | Mention providers of the rich editor. |
 | `saveAction()` | `SaveCommentAction::class` | Class that saves a new comment. |
 | `formSchema()` | `CommentFormSchema::class` | Class that builds the comment form. |
@@ -302,6 +303,12 @@ plain identifier.
 
 ```php
 Comments::make()->canComment(fn (Issue $record): bool => auth()->user()->can('comment', $record));
+```
+
+For a place that only shows a record — a preview, a report, an assistant's answer — make the comments read-only. Commenting is then off whatever `canComment()` says, the actions of a comment (quote, share, and any your item schema adds) are hidden, and the list itself refuses to post, quote or mount an action, so a client that sends the calls anyway changes nothing:
+
+```php
+Comments::make()->readOnly();
 ```
 
 `true` by default. When it is `false`, the form and the quote action are hidden and the list refuses to save a

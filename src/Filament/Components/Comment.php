@@ -189,7 +189,9 @@ class Comment extends Component
                 Actions::make([
                     $this->getQuoteAction(),
                     $this->getShareAction(),
-                ])->alignStart(),
+                ])
+                    ->alignStart()
+                    ->hidden(fn (CommentsList $livewire): bool => $livewire->settings->readOnly),
             ]);
     }
 

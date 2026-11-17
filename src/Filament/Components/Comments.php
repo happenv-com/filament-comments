@@ -88,6 +88,8 @@ class Comments extends Component
 
     protected bool | Closure $canComment = true;
 
+    protected bool | Closure $readOnly = false;
+
     final public function __construct(protected string $name) {}
 
     /**
@@ -143,8 +145,9 @@ class Comments extends Component
             format: $this->getCommentFormat(),
             sortColumn: $this->getSortColumn(),
             saveAction: $this->getSaveAction(),
-            canComment: $this->isCommentingEnabled(),
+            canComment: $this->isCommentingEnabled() && ! $this->isReadOnly(),
             timelineEvents: $this->getTimelineEvents(),
+            readOnly: $this->isReadOnly(),
         );
     }
 
@@ -367,6 +370,22 @@ class Comments extends Component
     public function isCommentingEnabled(): bool
     {
         return (bool) $this->evaluate($this->canComment);
+    }
+
+    /**
+     * Shows the comments and nothing else: no form, no action on a comment, and the list refuses whatever the
+     * client asks it to do. For a place that only shows a record (a preview, a report), where nothing may change.
+     */
+    public function readOnly(bool | Closure $condition = true): static
+    {
+        $this->readOnly = $condition;
+
+        return $this;
+    }
+
+    public function isReadOnly(): bool
+    {
+        return (bool) $this->evaluate($this->readOnly);
     }
 
     /**
