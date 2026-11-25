@@ -2,6 +2,21 @@
 
 All notable changes to `filament-comments` are documented in this file. Each section is written automatically from the GitHub release notes when a release is published — do not edit it by hand.
 
+## v2.5.0 - 2026-11-25
+
+<!-- Release notes generated using configuration in .github/release.yml at 2.x -->
+### What's Changed
+
+#### Other
+
+* feat: let the save action title the saved notification by @gorny-dev in https://github.com/happenv-com/filament-comments/pull/20
+
+### New Contributors
+
+* @gorny-dev made their first contribution in https://github.com/happenv-com/filament-comments/pull/20
+
+**Full Changelog**: https://github.com/happenv-com/filament-comments/compare/v2.4.0...v2.5.0
+
 ## v2.4.0 - 2026-11-17
 
 <!-- Release notes generated using configuration in .github/release.yml at 2.x -->
