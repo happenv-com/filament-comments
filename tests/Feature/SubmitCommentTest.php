@@ -6,6 +6,7 @@ use Filament\Notifications\Notification;
 use Happenv\FilamentComments\Enums\CommentsPaginationType;
 use Happenv\FilamentComments\Filament\Components\Comments;
 use Happenv\FilamentComments\Models\Comment;
+use Happenv\FilamentComments\Tests\Fixtures\Actions\MessageSaveCommentAction;
 use Happenv\FilamentComments\Tests\Fixtures\Actions\PrefixingSaveCommentAction;
 use Happenv\FilamentComments\Tests\Fixtures\Models\Post;
 use Happenv\FilamentComments\Tests\Fixtures\Models\User;
@@ -96,4 +97,16 @@ it('uses a custom save action', function (): void {
         ->assertHasNoFormErrors();
 
     expect($this->post->comments()->sole()->content)->toStartWith('[custom] ');
+});
+
+it('lets the save action name what was saved in the notification', function (): void {
+    $this->actingAs($this->user);
+
+    commentsList($this->post, Comments::make()->saveAction(MessageSaveCommentAction::class))
+        ->fillForm(['content' => '<p>Hello</p>'])
+        ->call('submitComment')
+        ->assertHasNoFormErrors()
+        ->assertNotified('Message sent');
+
+    expect($this->post->comments()->count())->toBe(1);
 });

@@ -229,6 +229,7 @@ final class SaveAndNotify implements SavesComment
 }
 ```
 
+- Notification: after a save the list shows "Comment added". A save action that also implements `Contracts\ProvidesSavedNotificationTitle` returns its own title from `savedNotificationTitle(): string` (asked after the save, in the current locale).
 - Form: extend `CommentFormSchema` and override `htmlFormatInput(string $contentField, array $mentions): RichEditor` or `markdownFormatInput(string $contentField): MarkdownEditor`. A from-scratch `ConfiguresCommentForm::configure(Schema $schema, CommentsSettings $settings)` must still have an action calling the list's `submitComment` method and use `$settings->contentField` as the field name.
 - Item: `ConfiguresCommentItem::configure(Schema $schema, CommentsSettings $settings): Schema` returns the given schema with the item component inside it, as `CommentItemSchema` does:
 
