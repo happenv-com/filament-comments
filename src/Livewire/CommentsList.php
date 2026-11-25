@@ -13,6 +13,7 @@ use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Schema;
+use Happenv\FilamentComments\Contracts\ProvidesSavedNotificationTitle;
 use Happenv\FilamentComments\Contracts\ProvidesTimelineEvents;
 use Happenv\FilamentComments\Enums\CommentFormat;
 use Happenv\FilamentComments\Enums\CommentFormLocation;
@@ -330,7 +331,8 @@ class CommentsList extends LivewireComponent implements HasActions, HasForms
             return;
         }
 
-        app($this->settings->saveAction)($this->record, $data, $user, $this->settings);
+        $saveAction = app($this->settings->saveAction);
+        $saveAction($this->record, $data, $user, $this->settings);
 
         $this->form->fill();
 
@@ -341,7 +343,9 @@ class CommentsList extends LivewireComponent implements HasActions, HasForms
 
         Notification::make()
             ->success()
-            ->title(__('happenv-filament-comments::comments.comment_added'))
+            ->title($saveAction instanceof ProvidesSavedNotificationTitle
+                ? $saveAction->savedNotificationTitle()
+                : __('happenv-filament-comments::comments.comment_added'))
             ->send();
     }
 

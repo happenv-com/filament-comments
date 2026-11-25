@@ -490,6 +490,23 @@ class SaveAndNotify implements SavesComment
 Comments::make()->saveAction(SaveAndNotify::class);
 ```
 
+After a save the list shows a "Comment added" notification. A save action that also implements
+`Contracts\ProvidesSavedNotificationTitle` names it itself, for example when the thread is a conversation:
+
+```php
+use Happenv\FilamentComments\Contracts\ProvidesSavedNotificationTitle;
+
+class SaveMessage implements ProvidesSavedNotificationTitle, SavesComment
+{
+    // __invoke() as above
+
+    public function savedNotificationTitle(): string
+    {
+        return __('messages.sent');
+    }
+}
+```
+
 #### Form schema
 
 The form schema class builds the comment form. Extend `CommentFormSchema` and override `htmlFormatInput()` or
